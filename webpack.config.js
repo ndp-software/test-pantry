@@ -3,7 +3,7 @@ var UglifyJsPlugin = webpack.optimize.UglifyJsPlugin;
 var path           = require('path');
 var env            = require('yargs').argv.mode;
 
-var libraryName = 'pop';
+var libraryName = 'papa';
 
 var plugins = [], outputFile;
 
@@ -15,7 +15,7 @@ if (env === 'build') {
 }
 
 var config = {
-  entry   : __dirname + '/src/pop.js',
+  entry   : __dirname + '/src/papa.js',
   devtool : 'source-map',
   output  : {
     path           : __dirname + '/lib',
