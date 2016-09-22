@@ -1,0 +1,30 @@
+{
+  "name": "pop.js",
+  "version": "1.0.0",
+  "description": "Factory library for Javascript testing",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/ndp/pop.js.git"
+  },
+  "keywords": [
+    "testing",
+    "factory"
+  ],
+  "author": "Andrew J. Peterson",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ndp/pop.js/issues"
+  },
+  "homepage": "https://github.com/ndp/pop.js#readme",
+  "devDependencies": {
+    "babel-core": "^6.14.0",
+    "babel-loader": "^6.2.5",
+    "babel-preset-es2015": "^6.14.0",
+    "jasmine": "^2.5.2",
+    "webpack": "^2.1.0-beta.25"
+  }
+}
