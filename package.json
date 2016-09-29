@@ -1,5 +1,5 @@
 {
-  "name": "papa-js",
+  "name": "pantry",
   "version": "1.0.0",
   "description": "Factory library for Javascript testing",
   "main": "index.js",
@@ -12,7 +12,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/ndp/papa-js.git"
+    "url": "git+ssh://git@github.com/ndp/pantry.git"
   },
   "keywords": [
     "testing",
@@ -21,9 +21,9 @@
   "author": "Andrew J. Peterson",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/ndp/papa.js/issues"
+    "url": "https://github.com/ndp/pantry/issues"
   },
-  "homepage": "https://github.com/ndp/papa-js#readme",
+  "homepage": "https://github.com/ndp/pantry#readme",
   "devDependencies": {
     "babel": "^6.5",
     "babel-core": "*",
