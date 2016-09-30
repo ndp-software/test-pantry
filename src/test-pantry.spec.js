@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import Pantry from './pantry'
+import Pantry from './test-pantry'
 
 
 describe('pantry', function () {
