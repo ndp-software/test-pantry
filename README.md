@@ -75,4 +75,4 @@ const myUsers = pantry.User(10)
 ## Legal
 
 Copyright (c) 2016 Andrew J. Peterson
-[Apache License](https://github.com/ndp/test-pantry/raw/master/LICENSE)
+[Apache 2.0 License](https://github.com/ndp/test-pantry/raw/master/LICENSE)
