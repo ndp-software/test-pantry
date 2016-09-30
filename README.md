@@ -59,7 +59,11 @@ import pantry from 'my-pantry'
 // use the factory
 const myUser = pantry('User')
 
-// or combine them:
+// The factory function is also attached to the factory as a function
+const myUser = pantry.User() or 
+               pantry['User']()
+
+// or combine them, to create "traits":
  const myUser = pantry('User', 'Player')
 
 // or Mix-and-match:
