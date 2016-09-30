@@ -1,7 +1,7 @@
 {
-  "name": "pantry",
+  "name": "test-pantry",
   "version": "1.0.0",
-  "description": "Factory library for Javascript testing",
+  "description": "Test Factory library for Javascript testing",
   "main": "index.js",
   "scripts": {
     "build": "WEBPACK_ENV=build webpack",
@@ -12,7 +12,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/ndp/pantry.git"
+    "url": "git+ssh://git@github.com/ndp/test-pantry.git"
   },
   "keywords": [
     "testing",
@@ -21,9 +21,9 @@
   "author": "Andrew J. Peterson",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/ndp/pantry/issues"
+    "url": "https://github.com/ndp/test-pantry/issues"
   },
-  "homepage": "https://github.com/ndp/pantry#readme",
+  "homepage": "https://github.com/ndp/test-pantry#readme",
   "devDependencies": {
     "babel": "^6.5",
     "babel-core": "*",
