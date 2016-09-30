@@ -70,3 +70,9 @@ const myUsers = pantry(10, User)
 // or
 const myUsers = pantry.User(10)
 ```
+
+
+## Legal
+
+Copyright (c) 2016 Andrew J. Peterson
+[Apache License](https://github.com/ndp/test-pantry/raw/master/LICENSE)
