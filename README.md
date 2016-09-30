@@ -1,5 +1,5 @@
-# test-pantry
-Javascript Test Factory Sous Chef
+# Test Pantry
+Easy Test Factories: Your <del>JS</del> ES Test Sous Chef 
 
 ## Installation & Usage
 
@@ -7,7 +7,7 @@ Javascript Test Factory Sous Chef
 
 ## Define your Factory (or Factories)
 
-Create and export factories in a factory file near your tests:
+Create and export factories in a file near your tests:
  
 ```javascript
 // my-pantry.js
@@ -24,9 +24,9 @@ pantry.recipeFor('Player', function() { return { score: Math.random() } })
 pantry.recipeFor('User', { name: 'Andy P', email: 'andy@ndpsoftware.com' })
 ```
 
-### Convenience Features
+### Factory Conveniences
 
-Object literal properties expressed as functions will be evaluated:
+Object literal properties expressed as functions are evaluated:
 
 ```javascript
 pantry.recipeFor('myObj', { key : () => Math.random() })
@@ -40,6 +40,7 @@ pantry.recipeFor( 'person',
                   function() { return { first: genName(), last: genName() } },
                   function(o) { o.fullName = `${o.first} ${o.last}`; return o })
 ```                 
+(In fact, you can chain together as many items as you need.)
 
 Use `this` context to access `count`, which is a serial number for the object.
 
