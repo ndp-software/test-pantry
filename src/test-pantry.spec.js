@@ -33,9 +33,14 @@ describe('pantry', function() {
 
     it('can be defined with an afterCreate function', function() {
       const genName = () => Math.random().toString(32)
-      pantry.recipeFor( 'person',
-                        function() { return { first: genName(), last: genName() } },
-                        function(o) { o.fullName = `${o.first} ${o.last}`; return o })
+      pantry.recipeFor('person',
+                       function() {
+                         return {first: genName(), last: genName()}
+                       },
+                       function(o) {
+                         o.fullName = `${o.first} ${o.last}`;
+                         return o
+                       })
 
       const result = pantry.person()
       expect(Object.keys(result)).to.eql(['first', 'last', 'fullName'])
@@ -47,6 +52,23 @@ describe('pantry', function() {
       })
       const result = pantry.myObj()
       expect(result).to.eql({key: 'value-1'})
+    })
+
+    it('can restart counts', function() {
+      pantry.recipeFor('count', function() {
+        return this.count
+      })
+      expect(pantry.count()).to.eql(1)
+      expect(pantry.count()).to.eql(2)
+
+      pantry.count.reset()
+      expect(pantry.count()).to.eql(1)
+      expect(pantry.count()).to.eql(2)
+
+      pantry.count.reset()
+      expect(pantry.count()).to.eql(1)
+      expect(pantry.count()).to.eql(2)
+      expect(pantry.count()).to.eql(3)
     })
 
     it('afterCreateFn can access context', function() {
@@ -208,7 +230,117 @@ describe('pantry', function() {
 
   })
 
-  describe('features: ', function() {
+  describe('random: ', function() {
+
+    it('provides predictable, but random numbers', function() {
+      pantry.recipeFor('test', function() {
+        return this.random()
+      })
+
+      expect(pantry.test()).to.eql(0.8722025543160253)
+      expect(pantry.test()).to.eql(0.4023928518604753)
+      expect(pantry.test()).to.eql(0.9647289658507073)
+      expect(pantry.test()).to.eql(0.30479896375101545)
+    })
+
+    it('provides some random coin flips', function() {
+      pantry.recipeFor('test', function() {
+        return {bool: this.flipCoin()}
+      })
+
+      for (let i = 0; i < 1000; i++) {
+        const o = pantry.test()
+        expect(typeof (o.bool)).to.eql('boolean')
+      }
+
+    })
+
+    it('provides some dieRoll', function() {
+      pantry.recipeFor('dice', function() {
+        return {
+          die1: this.rollDie(6),
+          die2: this.rollDie(6)
+        }
+      })
+      for (let i = 0; i < 1000; i++) {
+        const roll = pantry('dice')
+        expect(typeof roll.die1).to.eql('number')
+        expect(roll.die1).to.gte(0)
+        expect(roll.die1).to.lt(7)
+      }
+    })
+
+    it('provides some randomInt', function() {
+      pantry.recipeFor('dice', function() {
+        return {
+          die1: this.randomInt(6),
+          die2: this.randomInt(1, 6)
+        }
+      })
+      for (let i = 0; i < 1000; i++) {
+        const roll = pantry('dice')
+
+        expect(typeof roll.die1).to.eql('number')
+        expect(roll.die1).to.gte(0)
+        expect(roll.die1).to.lt(6)
+
+        expect(typeof roll.die2).to.eql('number')
+        expect(roll.die2).to.gte(1)
+        expect(roll.die2).to.lte(6)
+      }
+    })
+
+    it('random sequences are repeatable', function() {
+      pantry.recipeFor('randomSequence', function() {
+        return this.randomInt(10)
+      })
+
+      expect(pantry.randomSequence()).to.eql(9)
+      expect(pantry.randomSequence()).to.eql(6)
+      expect(pantry.randomSequence()).to.eql(2)
+      expect(pantry.randomSequence()).to.eql(5)
+      expect(pantry.randomSequence()).to.eql(1)
+      expect(pantry.randomSequence()).to.eql(3)
+      expect(pantry.randomSequence()).to.eql(3)
+
+      pantry.randomSequence.reset()
+      expect(pantry.randomSequence()).to.eql(9)
+      expect(pantry.randomSequence()).to.eql(6)
+      expect(pantry.randomSequence()).to.eql(2)
+      expect(pantry.randomSequence()).to.eql(5)
+      expect(pantry.randomSequence()).to.eql(1)
+      expect(pantry.randomSequence()).to.eql(3)
+      expect(pantry.randomSequence()).to.eql(3)
+    })
+
+    it('can be seeded from the start', function() {
+      pantry.recipeFor('randomSequence', function() {
+        return this.randomInt(1000)
+      })
+
+      pantry.randomSequence.reset('foo')
+      expect(pantry.randomSequence()).to.eql(467)
+      expect(pantry.randomSequence()).to.eql(731)
+
+      pantry.randomSequence.reset('foo')
+      expect(pantry.randomSequence()).to.eql(467)
+      expect(pantry.randomSequence()).to.eql(731)
+
+    })
+
+    it('produces different values with different seeds', function() {
+      pantry.recipeFor('randomSequence', function() {
+        return this.randomInt(1000)
+      })
+
+      pantry.randomSequence.reset('foo')
+      expect(pantry.randomSequence()).to.eql(467)
+      expect(pantry.randomSequence()).to.eql(731)
+
+      pantry.randomSequence.reset('bar')
+      expect(pantry.randomSequence()).not.to.eql(467)
+      expect(pantry.randomSequence()).not.to.eql(731)
+    })
 
   })
 })

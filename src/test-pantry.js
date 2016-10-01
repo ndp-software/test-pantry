@@ -1,12 +1,10 @@
+import seedrandom from 'seedrandom'
+
 export default function Pantry() {
 
   const pantry = function(...names) {
 
-    let count = 0
-    if (typeof names[0] == 'number') {
-      count = names[0]
-      names.shift()
-    }
+    const howMany = typeof names[0] == 'number' ? names.shift() : 0
 
     names.forEach(name => {
       if (!recipeFn(name) && typeof name !== 'object') {
@@ -19,10 +17,10 @@ export default function Pantry() {
       }
     })
 
-    if (count == 0) {
+    if (howMany == 0) {
       return cook(names)
     } else {
-      return [...Array(count)].map(() => cook(names))
+      return [...Array(howMany)].map(() => cook(names))
     }
   }
 
@@ -75,18 +73,26 @@ export default function Pantry() {
     }
   }
 
-  function buildFn(valOrFn) {
-    return (typeof valOrFn == 'function' ?
-      valOrFn :
-      buildObjectFn(valOrFn))
-  }
+  const recipeFor = (name, ...objOrFns) => {
+    let count  = 0
+    let random = seedrandom(name)
 
-  pantry.recipeFor = (name, ...objOrFns) => {
-    let count = 0
+    // Returns a random integer between min (included) and max (excluded)
+    // Using Math.round() will give you a non-uniform distribution!
+    function randomInt(min, max) {
+      if (max == undefined) [min,max] = [0, min]
+      min = Math.ceil(min);
+      max = Math.floor(max);
+      return Math.floor(random() * (max - min)) + min;
+    }
+
+    function flipCoin() {
+      return random() > 0.5
+    }
+
     const fns = objOrFns
       .map(objOrFn => {
              const type = typeof objOrFn;
-             //console.log(type, objOrFn)
              if (type === 'object') {
                return buildObjectFn(objOrFn)
              } else if (type === 'function') {
@@ -96,12 +102,18 @@ export default function Pantry() {
 
     recipeFn(name, (initialValues = {}) => {
       count++
-      const context = {count}
+      const context = {
+                 count,
+                 random,
+                 randomInt,
+                 flipCoin,
+        rollDie: randomInt,
+      }
       return fns.reduce((vals, fn) => fn.call(context, vals), initialValues)
     })
 
     // And return a fn that calls `pantry()` with the right arguments
-    return pantry[name] = (...args) => {
+    const returnFn = pantry[name] = (...args) => {
       if (typeof args[0] == 'number') {
         const count = args.shift()
         return pantry(count, name, ...args)
@@ -109,6 +121,11 @@ export default function Pantry() {
         return pantry(name, ...args)
       }
     }
+    returnFn.reset = (seed = name) => {
+      count  = 0
+      random = seedrandom(seed)
+    }
+    return returnFn
   }
 
   function recipeFn(name, fn) {
@@ -118,5 +135,7 @@ export default function Pantry() {
     return pantry[`__${name}`]
   }
 
+  // Public API
+  pantry.recipeFor = recipeFor
   return pantry
 }
