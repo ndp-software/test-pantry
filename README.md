@@ -86,7 +86,7 @@ pantry('has-id') // => { id : 'id-2' }
 
 The `this` context also provides:
 
-  * **`this.random()`** A random float between 0 (inclusive) and 1 (exclusive). This is an alternative to `Math.random`. Sometimes in a test it's useful to use random numbers, but doing so can make writing assertions harder. This method meets you half way: it provides a random series of numbers-- but always the same sequence (based on a controllable seed). See [Random Reset](#Random Reset) below
+  * **`this.random()`** A random float between 0 (inclusive) and 1 (exclusive). This is an alternative to `Math.random`. Sometimes in a test it's useful to use random numbers, but doing so can make writing assertions harder. This method meets you half way: it provides a random series of numbers-- but always the same sequence (based on a controllable seed). See [Random Reset](#random-reset) below
   * **`this.randomInt(6)`** A random integer 0..5. Alias: `rollDie`.
   * **`this.randomInt(6, 10)`** A random integer 6..10
   * **`this.flipCoin()`** A boolean, true or false
