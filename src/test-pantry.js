@@ -37,6 +37,20 @@ export default function Pantry() {
       && Object.keys(o).length == 0
   }
 
+  // Given an obj, returns an object with all of the
+  // properties whose values are functions called.
+  function callPropertyFns(o) {
+    return Object.keys(o).reduce((result, k) => {
+      const v   = o[k]
+      result[k] = (typeof(v) == 'function') ? v.call(this) : v
+      return result
+    }, {})
+  }
+
+  // Given a function, returns a version of that function that will
+  // merges its output with the input.
+  // Assumes that if the function accepts an object, it will do the merging
+  // itself; therefore, just implemented for the arity of 0 case.
   function buildMergeFn(fn) {
     if (fn.length === 0) {
       return function(input) {
@@ -54,15 +68,6 @@ export default function Pantry() {
     }
   }
 
-  function callPropertyFns(o) {
-    return Object.keys(o).reduce((result, k) => {
-      const v   = o[k]
-      result[k] = (typeof(v) == 'function') ? v.call(this) : v
-      //console.log(v, typeof v, v.toString(), result[k])
-      return result
-    }, {})
-  }
-
   function buildObject(initialValues, values) {
     return Object.assign({}, initialValues, callPropertyFns.call(this, values))
   }
@@ -71,6 +76,14 @@ export default function Pantry() {
     return function(initialValues) {
       return buildObject.call(this, initialValues, values)
     }
+  }
+
+  // All storage of functions is here
+  function recipeFn(name, fn) {
+    if (fn) {
+      pantry[`__${name}`] = fn
+    }
+    return pantry[`__${name}`]
   }
 
   const recipeFor = (name, ...objOrFns) => {
@@ -95,6 +108,8 @@ export default function Pantry() {
              const type = typeof objOrFn;
              if (type === 'object') {
                return buildObjectFn(objOrFn)
+             } else if (type === 'string') {
+               return recipeFn(objOrFn)
              } else if (type === 'function') {
                return buildMergeFn(objOrFn)
              }
@@ -112,7 +127,8 @@ export default function Pantry() {
       return fns.reduce((vals, fn) => fn.call(context, vals), initialValues)
     })
 
-    // And return a fn that calls `pantry()` with the right arguments
+    // And return a fn that calls `pantry()` with the arguments
+    // Need to switch the number (if given) to be first.
     const returnFn = pantry[name] = (...args) => {
       if (typeof args[0] == 'number') {
         const count = args.shift()
@@ -126,13 +142,6 @@ export default function Pantry() {
       random = seedrandom(seed)
     }
     return returnFn
-  }
-
-  function recipeFn(name, fn) {
-    if (fn) {
-      pantry[`__${name}`] = fn
-    }
-    return pantry[`__${name}`]
   }
 
   // Public API

@@ -18,24 +18,31 @@ describe('pantry', function() {
       expect(result).to.eql({key: 'value'})
     })
 
-    it('is defined using a function', function() {
+    it('is defined using a function returning an object', function() {
       pantry.recipeFor('myObj', () => ({key: 'value'}))
       const result = pantry.myObj()
       expect(result).to.eql({key: 'value'})
     })
 
-    it('is defined with simply a string', function() {
+    it('is defined with function returning a string', function() {
       pantry.recipeFor('id', function() {
         return `id-${this.count}`
       })
       expect(pantry.id()).to.eql('id-1')
     })
 
+    it('is defined with function returning a number', function() {
+      pantry.recipeFor('id', function() {
+        return this.count
+      })
+      expect(pantry.id()).to.eql(1)
+    })
+
     it('can be defined with an afterCreate function', function() {
-      const genName = () => Math.random().toString(32)
+      const genName = () => 'foo'
       pantry.recipeFor('person',
                        function() {
-                         return {first: genName(), last: genName()}
+                         return {first: genName(), last: 'last'}
                        },
                        function(o) {
                          o.fullName = `${o.first} ${o.last}`;
@@ -44,14 +51,31 @@ describe('pantry', function() {
 
       const result = pantry.person()
       expect(Object.keys(result)).to.eql(['first', 'last', 'fullName'])
+      expect(result.fullName).to.eql('foo last')
+    })
+
+    it('can be built from other factories', function() {
+      pantry.recipeFor('a', function() {
+        return {a: 'a'}
+      })
+      pantry.recipeFor('b', function() {
+        return {b: 'b'}
+      })
+      pantry.recipeFor('c', function() {
+        return {c: 'c'}
+      })
+      pantry.recipeFor('abc', 'a', 'b', 'c')
+
+      expect(pantry('abc')).to.eql({a: 'a', b: 'b', c: 'c'})
+
     })
 
     it('factory function can access context', function() {
       pantry.recipeFor('myObj', function() {
         return {key: `value-${this.count}`}
       })
-      const result = pantry.myObj()
-      expect(result).to.eql({key: 'value-1'})
+      expect(pantry.myObj()).to.eql({key: 'value-1'})
+      expect(pantry.myObj()).to.eql({key: 'value-2'})
     })
 
     it('can restart counts', function() {
@@ -84,6 +108,8 @@ describe('pantry', function() {
       const f      = pantry.recipeFor('myObj', {key: 'value'})
       const result = f()
       expect(result).to.eql({key: 'value'})
+
+      expect(f(1)).to.eql([{key: 'value'}])
     })
 
     it('can be defined with multiple objects', function() {
@@ -155,7 +181,6 @@ describe('pantry', function() {
       const result = pantry('myObj')
       expect(result).to.eql({key: 'value'})
     })
-
 
     it('handles several different object-based factories', function() {
       pantry.recipeFor('id', {
