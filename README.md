@@ -1,4 +1,4 @@
-# Test Pantry
+# Test Pantry  [![Build Status](https://travis-ci.org/ndp/test-pantry.svg?branch=master)](https://travis-ci.org/ndp/test-pantry)
 Easy Test Factories: Your <del>Javascript</del> ES Test Sous Chef 
 
 ## Installation & Basic Usage
