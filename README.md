@@ -3,7 +3,7 @@ Easy Test Factories: Your <del>Javascript</del> ES Test Sous Chef
 
 ## Installation & Basic Usage
 
-`$ npm install -D test-pantry`
+`# $ npm install -D test-pantry`
 
 ### Basic Factory Definition
 
@@ -11,10 +11,10 @@ Create and export factories in a file near your tests:
  
 ```javascript
 // my-pantry.js
-import TestPantry from `test-pantry`
 
-export default const pantry = new TestPantry()
-...
+// import TestPantry from `test-pantry`
+ 
+const pantry = new TestPantry()
 ```
 
 Within this file, factories are defined with functions or object literals:
@@ -24,49 +24,60 @@ pantry.recipeFor('player', function() { return { score: Math.random() } })
 pantry.recipeFor('user', { name: 'Andy P', email: 'andy@ndpsoftware.com' })
 ```
 
+For any object returned from a factory, properties expressed as functions are evaluated:
+
+```
+pantry.recipeFor('keyed', { key: () => Math.random() })
+```
+
 ### Basic Factory Usage
 
 ```javascript
-// my-test.js
-import pantry from 'my-pantry'
+// my-test.js -- needs to `import pantry from 'my-pantry'`
 
 // use the factory
-const myUser = pantry('user')
-const myUser = pantry.user()   // alternate call syntax
+pantry('user')  // => { name: 'Andy P', email: 'andy@ndpsoftware.com' }
+
+// alternate call syntax:
+pantry.user()   // => { name: 'Andy P', email: 'andy@ndpsoftware.com' }
 
 // or combine them, to create "traits". Each factory's results are merged:
-const myUser = pantry('user', 'player')
+pantry('user', 'player') // => { name: 'Andy P',
+                         //      email: 'andy@ndpsoftware.com',
+                         //      score: 0.6207161337323834 }
 
 // or Mix-and-match as many as you'd like:
- const myUser = pantry('user', 'player', { gender: 'male' }, 'has-id')
+pantry('user', 'player', { gender: 'male' }, 'keyed')
+   // => { name: 'Andy P',
+   //      email: 'andy@ndpsoftware.com',
+   //      score: 0.20819184742637864,
+   //      gender: 'male',
+   //      key: 0.652420063866042 }
 ```
 Arrays of objects are created by passing an integer as the first parameter:
+
 ```javascript
-const myUsers = pantry(10, 'user')
-// or
-const myUsers = pantry.user(10)
+pantry(3, 'user') // or `pantry.user(10)`
+                  //  => [ { name: 'Andy P', email: 'andy@ndpsoftware.com' },
+                  //       { name: 'Andy P', email: 'andy@ndpsoftware.com' },
+                  //       { name: 'Andy P', email: 'andy@ndpsoftware.com' } ]
 ```
 
 ## Advanced
 
 ### Factory Conveniences
 
-For any object returned from a factory, properties expressed as functions are evaluated:
-
-```javascript
-pantry.recipeFor('myObj', { key : () => Math.random() })
-```
-
-Most factory tools support an `afterCreate` method, for making small changes to your objects
+Most factory libraries support an `afterCreate` method, for making changes to your objects
 before they are returned. Test Pantry allows any number of methods or object literals to be 
 chained together to make your factory. Each method is given the object returned from 
 the previous factory methods:
 
 ```javascript
-const genName = () => Math.random().toString(32)
 pantry.recipeFor( 'person',
-                  function() { return { first: genName(), last: genName() } },
+                  function() { return { first: 'Jennie', last: 'Lou' } },
                   function(o) { o.fullName = `${o.first} ${o.last}`; return o })
+                  
+pantry.person() // => { first: 'Jennie', last: 'Lou', fullName: 'Jennie Lou' }                  
 ```                 
 
 ### Utilities on Factory Context
@@ -105,7 +116,7 @@ pantry.recipeFor('num', function() { return this.count  })
 pantry.num() // => 1
 pantry.num() // => 2
 pantry.num() // => 3
-f.reset()
+pantry.num.reset()
 pantry.num() // => 1
 ```
 
@@ -118,20 +129,22 @@ generator (PRNG). This is done for you, and each factory has its own sequence.
 Here's an example:
 
 ```
-  pantry.recipeFor('randomSequence', function() {
-    return this.randomInt(10)
-  })
+pantry.recipeFor('randomSequence', function() {
+  return this.randomInt(10)
+})
 
-  expect(pantry.randomSequence()).to.eql(9)
-  expect(pantry.randomSequence()).to.eql(6)
-  expect(pantry.randomSequence()).to.eql(2)
-  expect(pantry.randomSequence()).to.eql(5)
+const assert = function(x) { if (!x) throw "Assertion failure!" }
 
-  pantry.randomSequence.reset()   // <--- let's start over
-  expect(pantry.randomSequence()).to.eql(9)
-  expect(pantry.randomSequence()).to.eql(6)
-  expect(pantry.randomSequence()).to.eql(2)
-  ...
+assert( pantry.randomSequence() == 9)
+assert( pantry.randomSequence() == 6)
+assert( pantry.randomSequence() == 2)
+assert( pantry.randomSequence() == 5)
+
+pantry.randomSequence.reset()   // let's start over
+
+assert( pantry.randomSequence() == 9)
+assert( pantry.randomSequence() == 6)
+assert( pantry.randomSequence() == 2)
 ```
 
 For some tests, it may make sense to set the seed before you start:
@@ -141,16 +154,15 @@ pantry.recipeFor('randomSequence', function() {
   return this.randomInt(1000)
 })
 
-it('test 1', function() {
-  pantry.randomSequence.reset('foo')
-  expect(pantry.randomSequence()).to.eql(467)
-  expect(pantry.randomSequence()).to.eql(731)
-})
-it('test 2', function() {
-  pantry.randomSequence.reset('foo')
-  expect(pantry.randomSequence()).to.eql(467)
-  expect(pantry.randomSequence()).to.eql(731)
-})
+// 'test 1'
+pantry.randomSequence.reset('foo')
+assert( pantry.randomSequence() == 467)
+assert( pantry.randomSequence() == 731)
+
+// 'test 2'
+pantry.randomSequence.reset('foo')
+assert( pantry.randomSequence() == 467)
+assert( pantry.randomSequence() == 731)
 ```
 
 ## Legal
