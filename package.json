@@ -1,8 +1,9 @@
 {
   "name": "test-pantry",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "Test Factory library for Javascript testing",
   "main": "lib/test-pantry.js",
+  "files": ["lib", "src/test-pantry.js"],
   "scripts": {
     "build": "WEBPACK_ENV=build webpack",
     "test": "mocha --compilers js:babel-core/register --colors 'src/**/*.spec.js'",
@@ -19,7 +20,10 @@
     "testing",
     "factory"
   ],
-  "author": "Andrew J. Peterson",
+  "author": {
+    "name": "Andrew J. Peterson",
+    "email": "andy@ndpsoftware.com"
+  },
   "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/ndp/test-pantry/issues"
