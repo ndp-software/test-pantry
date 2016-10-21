@@ -10,9 +10,9 @@ Easy Test Factories: Your <del>Javascript</del> ES Test Sous Chef
 Create and export factories in a file near your tests:
  
 ```javascript
-// my-pantry.js
+// my-pantries.js
 
-// import TestPantry from `test-pantry`
+import TestPantry from `test-pantry`
  
 const pantry = new TestPantry()
 ```
@@ -64,6 +64,12 @@ pantry(3, 'user') // or `pantry.user(10)`
 ```
 
 ## Advanced
+
+### Multiple Factories
+
+There is no single, global factory. Generally you will just need one factory for your
+code, but it's easy to create more with `new TestPantry()`.
+
 
 ### Factory Conveniences
 
