@@ -6,6 +6,7 @@ export default function Pantry() {
 
     let names     = args
     const howMany = typeof names[0] == 'number' ? names.shift() : 0
+    names         = names.filter(n => n !== undefined)
 
     names.forEach(name => {
       if (!recipeFn(name) && typeof name !== 'object') {
@@ -135,11 +136,19 @@ export default function Pantry() {
       if (typeof args[0] == 'number') {
         const count = args.shift()
         return pantry(count, name, ...args)
+      } else if (looksLikeIterator(args)) {
+        // Support `Array(2).fill().map(factory)` and other iterators
+        return pantry(name, args[0])
       }
       return pantry(name, ...args)
     }
 
+    function looksLikeIterator(args) {
+      return args.length == 3
+             && typeof args[1] == 'number'
+             && typeof args[2] == 'object'
     }
+
     returnFn.reset = (seed = name) => {
       count  = 0
       random = seedrandom(seed)

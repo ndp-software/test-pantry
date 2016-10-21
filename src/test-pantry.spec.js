@@ -253,7 +253,30 @@ describe('pantry', function() {
       expect(result).to.eql([{key: 'value'}, {key: 'value'}])
     })
 
+    it('can be used in a filled array loop', function() {
+      pantry.recipeFor('myObj', {key: 'value'})
+      const result = Array(2).fill().map(pantry.myObj)
+      expect(result).to.eql([{key: 'value'}, {key: 'value'}])
+    })
+
+    it('can be used in a `map` loop', function() {
+      pantry.recipeFor('myObj', {key: 'value'})
+      const result = [1,3,5].map(x => ({id: `id-${x}`})).map(pantry.myObj)
+      expect(result).to.eql([
+        {id: 'id-1', key: 'value'},
+        {id: 'id-3', key: 'value'},
+        {id: 'id-5', key: 'value'}
+      ])
+    })
+
+    it('can be with spread operator', function() {
+      pantry.recipeFor('myObj', {key: 'value'})
+      const result = [...Array(2)].map(pantry.myObj)
+      expect(result).to.eql([{key: 'value'}, {key: 'value'}])
+    })
+
   })
+
 
   describe('random: ', function() {
 
