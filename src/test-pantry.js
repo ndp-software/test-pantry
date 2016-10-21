@@ -2,26 +2,26 @@ import seedrandom from 'seedrandom'
 
 export default function Pantry() {
 
-  const pantry = function(...names) {
+  const pantry = function(...args) {
 
+    let names     = args
     const howMany = typeof names[0] == 'number' ? names.shift() : 0
 
     names.forEach(name => {
       if (!recipeFn(name) && typeof name !== 'object') {
-        throw(`Unknown factory/trait '${name}'`)
+        throw `Unknown factory/trait '${name}'`
       }
     })
     names.forEach(name => {
       if (typeof recipeFn(name) !== 'function' && typeof name !== 'object') {
-        throw(`Factory/trait '${name}' not a function`)
+        throw `Factory/trait '${name}' not a function`
       }
     })
 
-    if (howMany == 0) {
-      return cook(names)
-    } else {
+    if (howMany != 0) {
       return [...Array(howMany)].map(() => cook(names))
     }
+    return cook(names)
   }
 
   function cook(names) {
@@ -33,8 +33,8 @@ export default function Pantry() {
   }
 
   function isEmptyObject(o) {
-    return typeof(o) == 'object'
-      && Object.keys(o).length == 0
+    return typeof o == 'object'
+           && Object.keys(o).length == 0
   }
 
   // Given an obj, returns an object with all of the
@@ -42,7 +42,7 @@ export default function Pantry() {
   function callPropertyFns(o) {
     return Object.keys(o).reduce((result, k) => {
       const v   = o[k]
-      result[k] = (typeof(v) == 'function') ? v.call(this) : v
+      result[k] = typeof v == 'function' ? v.call(this) : v
       return result
     }, {})
   }
@@ -55,17 +55,17 @@ export default function Pantry() {
     if (fn.length === 0) {
       return function(input) {
         const values = fn.call(this)
-        if (typeof(values) !== 'object') {
+        if (typeof values !== 'object') {
           if (!isEmptyObject(input)) {
-            throw `Unable to combine '${typeof(values)}' with input '${JSON.stringify(input)}'`
+            throw `Unable to combine '${typeof values}' with input '${JSON.stringify(input)}'`
           }
           return values
         }
         return Object.assign({}, input, values)
       }
-    } else {
-      return fn
     }
+
+    return fn
   }
 
   function buildObject(initialValues, values) {
@@ -92,8 +92,11 @@ export default function Pantry() {
 
     // Returns a random integer between min (included) and max (excluded)
     // Using Math.round() will give you a non-uniform distribution!
-    function randomInt(min, max) {
-      if (max == undefined) [min,max] = [0, min]
+    function randomInt(a, b) {
+      let [min,max] = [a, b]
+      if (max == undefined) {
+        [min,max] = [0, min]
+      }
       min = Math.ceil(min);
       max = Math.floor(max);
       return Math.floor(random() * (max - min)) + min;
@@ -108,11 +111,10 @@ export default function Pantry() {
              const type = typeof objOrFn;
              if (type === 'object') {
                return buildObjectFn(objOrFn)
-             } else if (type === 'string') {
-               return recipeFn(objOrFn)
              } else if (type === 'function') {
                return buildMergeFn(objOrFn)
              }
+             return recipeFn(objOrFn) // String case + catch all
            })
 
     recipeFn(name, (initialValues = {}) => {
@@ -122,25 +124,29 @@ export default function Pantry() {
                  random,
                  randomInt,
                  flipCoin,
-        rollDie: randomInt,
+        rollDie: randomInt
       }
       return fns.reduce((vals, fn) => fn.call(context, vals), initialValues)
     })
 
     // And return a fn that calls `pantry()` with the arguments
     // Need to switch the number (if given) to be first.
-    const returnFn = pantry[name] = (...args) => {
+    const returnFn = (...args) => {
       if (typeof args[0] == 'number') {
         const count = args.shift()
         return pantry(count, name, ...args)
-      } else {
-        return pantry(name, ...args)
       }
+      return pantry(name, ...args)
+    }
+
     }
     returnFn.reset = (seed = name) => {
       count  = 0
       random = seedrandom(seed)
     }
+
+    pantry[name] = returnFn
+
     return returnFn
   }
 

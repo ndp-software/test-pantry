@@ -275,7 +275,7 @@ describe('pantry', function() {
 
       for (let i = 0; i < 1000; i++) {
         const o = pantry.test()
-        expect(typeof (o.bool)).to.eql('boolean')
+        expect(typeof o.bool).to.eql('boolean')
       }
 
     })
