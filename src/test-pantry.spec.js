@@ -261,7 +261,7 @@ describe('pantry', function() {
 
     it('can be used in a `map` loop', function() {
       pantry.recipeFor('myObj', {key: 'value'})
-      const result = [1,3,5].map(x => ({id: `id-${x}`})).map(pantry.myObj)
+      const result = [1, 3, 5].map(x => ({id: `id-${x}`})).map(pantry.myObj)
       expect(result).to.eql([
         {id: 'id-1', key: 'value'},
         {id: 'id-3', key: 'value'},
@@ -336,6 +336,28 @@ describe('pantry', function() {
         expect(roll.die2).to.gte(1)
         expect(roll.die2).to.lte(6)
       }
+    })
+
+    it('can sample one of several values', function() {
+      pantry.recipeFor('roshambo', function() {
+        return this.sample('rock', 'paper', 'scissors')
+      })
+      expect(pantry.roshambo()).to.eql('paper')
+      expect(pantry.roshambo()).to.eql('rock')
+      expect(pantry.roshambo()).to.eql('paper')
+      expect(pantry.roshambo()).to.eql('scissors')
+      expect(pantry.roshambo()).to.eql('rock')
+    })
+
+    it('can sample from an array  values', function() {
+      pantry.recipeFor('roshambo', function() {
+        return this.sample(['rock', 'paper', 'scissors'])
+      })
+      expect(pantry.roshambo()).to.eql('paper')
+      expect(pantry.roshambo()).to.eql('rock')
+      expect(pantry.roshambo()).to.eql('paper')
+      expect(pantry.roshambo()).to.eql('scissors')
+      expect(pantry.roshambo()).to.eql('rock')
     })
 
     it('random sequences are repeatable', function() {
