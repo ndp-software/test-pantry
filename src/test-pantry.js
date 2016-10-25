@@ -107,6 +107,11 @@ export default function Pantry() {
       return random() > 0.5
     }
 
+    function sample(...args) {
+      if (args[0] && args.length == 1 && Array.isArray(args[0])) args = args[0]
+      return args[randomInt(0, args.length)]
+    }
+
     const fns = objOrFns
       .map(objOrFn => {
              const type = typeof objOrFn;
@@ -125,6 +130,7 @@ export default function Pantry() {
                  random,
                  randomInt,
                  flipCoin,
+                 sample,
         rollDie: randomInt
       }
       return fns.reduce((vals, fn) => fn.call(context, vals), initialValues)
