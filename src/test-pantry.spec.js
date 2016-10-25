@@ -173,6 +173,25 @@ describe('pantry', function() {
       expect(pantry.entity()).to.eql({id: 'id-1', name: 'name'})
       expect(pantry.entity()).to.eql({id: 'id-2', name: 'name'})
     })
+
+    it('can chain together functions for recipes', function() {
+      pantry.recipeFor('x', function() {
+        return {a: 'A'}
+      }, function() {
+        return {b: 'B'}
+      })
+      expect(pantry.x()).to.eql({a: 'A', b: 'B'})
+    })
+
+    it('can chain together functions that feed into each other', function() {
+      pantry.recipeFor('x', function() {
+        return {a: 'A'}
+      }, function(c) {
+        return {b: c}
+      })
+      expect(pantry.x()).to.eql({b: {a: 'A'}})
+    })
+
   })
 
   describe('cooking: ', function() {
@@ -239,6 +258,26 @@ describe('pantry', function() {
       })
       const r = pantry('id', 'named', {'timestamp': 'june 4th'})
       expect(r).to.eql({id: 1, name: 'name #1', timestamp: 'june 4th'})
+    })
+
+    describe('recipe does not accept arguments', function() {
+      it('merges params given', function() {
+        pantry.recipeFor('x', function() {
+          return {x: 5}
+        })
+        const r = pantry('x', {y: 10})
+        expect(r).to.eql({x: 5, y: 10})
+      })
+    })
+
+    describe('recipe accepts arguments', function() {
+      it('passes the first parameter in to first function', function() {
+        pantry.recipeFor('x', function(inputs) {
+          return {x: 3 * inputs.y}
+        })
+        const r = pantry.x({y: 10})
+        expect(r).to.eql({x: 30})
+      })
     })
 
     it('will create multiple objects when a number is given', function() {
@@ -412,5 +451,22 @@ describe('pantry', function() {
       expect(pantry.randomSequence()).not.to.eql(731)
     })
 
+  })
+
+  xit('does it all', function() {
+    pantry.recipeFor('s', function(data) {
+      return Object.assign({}, {
+        y: 7,
+      }, data)
+    }, function(ss) {
+      console.log(ss)
+      ss.calced = `${ss.x} ${ss.y}`
+      return ss
+    })
+
+    const r = pantry('s', {x: 2})
+    expect(r.x).to.eql(2)
+    expect(r.y).to.eql(7)
+    expect(r.calced).to.eql('2 7')
   })
 })

@@ -3,7 +3,6 @@ import seedrandom from 'seedrandom'
 export default function Pantry() {
 
   const pantry = function(...args) {
-
     let names     = args
     const howMany = typeof names[0] == 'number' ? names.shift() : 0
     names         = names.filter(n => n !== undefined)
@@ -19,6 +18,13 @@ export default function Pantry() {
       }
     })
 
+    // May need to flip the first and second parameter
+    if (args.length >= 2
+        && typeof args[0] == 'string'
+        && typeof args[1] == 'object') {
+      [names[0], names[1]] = [names[1], names[0]]
+    }
+
     if (howMany != 0) {
       return [...Array(howMany)].map(() => cook(names))
     }
@@ -29,7 +35,7 @@ export default function Pantry() {
     return names.reduce((acc, name) => {
       return typeof name == 'object'
         ? Object.assign({}, acc, name)
-        : buildMergeFn(recipeFn(name))(acc)
+        : recipeFn(name)(acc)
     }, {})
   }
 
@@ -65,7 +71,6 @@ export default function Pantry() {
         return Object.assign({}, input, values)
       }
     }
-
     return fn
   }
 
