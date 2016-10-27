@@ -1,6 +1,6 @@
 {
   "name": "test-pantry",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "description": "Test Factory library for Javascript testing",
   "main": "lib/test-pantry.js",
   "files": ["lib", "src/test-pantry.js"],

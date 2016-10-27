@@ -8,20 +8,22 @@ export default function Pantry() {
     names         = names.filter(n => n !== undefined)
 
     names.forEach(name => {
-      if (!recipeFn(name) && typeof name !== 'object') {
+      if (typeof name == 'string' && !recipeFn(name)) {
         throw `Unknown factory/trait '${name}'`
       }
     })
     names.forEach(name => {
-      if (typeof recipeFn(name) !== 'function' && typeof name !== 'object') {
+      if (typeof recipeFn(name) !== 'function'
+          && typeof name !== 'object'
+          && typeof name !== 'function') {
         throw `Factory/trait '${name}' not a function`
       }
     })
 
     // May need to flip the first and second parameter
-    if (args.length >= 2
-        && typeof args[0] == 'string'
-        && typeof args[1] == 'object') {
+    if (names.length >= 2
+        && typeof names[0] == 'string'
+        && typeof names[1] == 'object') {
       [names[0], names[1]] = [names[1], names[0]]
     }
 
@@ -33,9 +35,9 @@ export default function Pantry() {
 
   function cook(names) {
     return names.reduce((acc, name) => {
-      return typeof name == 'object'
-        ? Object.assign({}, acc, name)
-        : recipeFn(name)(acc)
+      if (typeof name == 'object')
+        return Object.assign({}, acc, name)
+      return recipeFn(name)(acc)
     }, {})
   }
 
@@ -89,7 +91,7 @@ export default function Pantry() {
     if (fn) {
       pantry[`__${name}`] = fn
     }
-    return pantry[`__${name}`]
+    return pantry[`__${name}`] || (typeof name == 'function' && name)
   }
 
   const recipeFor = (name, ...objOrFns) => {

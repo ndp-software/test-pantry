@@ -265,8 +265,8 @@ describe('pantry', function() {
         pantry.recipeFor('x', function() {
           return {x: 5}
         })
-        const r = pantry('x', {y: 10})
-        expect(r).to.eql({x: 5, y: 10})
+        expect(pantry('x', {y: 10})).to.eql({x: 5, y: 10})
+        expect(pantry.x({y: 10})).to.eql({x: 5, y: 10})
       })
     })
 
@@ -312,6 +312,46 @@ describe('pantry', function() {
       pantry.recipeFor('myObj', {key: 'value'})
       const result = [...Array(2)].map(pantry.myObj)
       expect(result).to.eql([{key: 'value'}, {key: 'value'}])
+    })
+
+    it('an "after" function can access factory object', function() {
+      pantry.recipeFor('cat', function() {
+        return {id: `id-${this.count}`}
+      })
+
+      const cats = pantry.cat(2, function(o) {
+        o.id = `cat-${o.id}`;
+        return o
+      })
+
+      expect(cats).to.eql([
+        {
+          'id': 'cat-id-1'
+        },
+        {
+          'id': 'cat-id-2'
+        }
+      ])
+    })
+
+    xit('an "after" function can access `this` values', function() {
+      pantry.recipeFor('cat', function() {
+        return {id: `id-${this.count}`}
+      })
+
+      const cats = pantry.cat(2, function(o) {
+        o.id = `cat-id-${this.count}`;
+        return o
+      })
+
+      expect(cats).to.eql([
+        {
+          'id': 'cat-id-1'
+        },
+        {
+          'id': 'cat-id-2'
+        }
+      ])
     })
 
   })
@@ -453,20 +493,4 @@ describe('pantry', function() {
 
   })
 
-  xit('does it all', function() {
-    pantry.recipeFor('s', function(data) {
-      return Object.assign({}, {
-        y: 7,
-      }, data)
-    }, function(ss) {
-      console.log(ss)
-      ss.calced = `${ss.x} ${ss.y}`
-      return ss
-    })
-
-    const r = pantry('s', {x: 2})
-    expect(r.x).to.eql(2)
-    expect(r.y).to.eql(7)
-    expect(r.calced).to.eql('2 7')
-  })
 })
