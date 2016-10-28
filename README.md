@@ -109,6 +109,14 @@ The `this` context also provides:
   * **`this.sample('rock', 'paper', 'scissors')`** Return one of the given parameters
   * **`this.flipCoin()`** A boolean, true or false
   * **`this.count`** an index of which execution of the factory this is
+  * **`this.name`** the name of the main factory running. This is useful for composing shared properties, such as 
+```javascript
+pantry.recipeFor('hasId', function() {  
+  return {
+    id: `${this.name}-${this.count}`
+  }
+})
+```
   
 For more variety, use a package like [Faker](https://www.npmjs.com/package/faker)
 
