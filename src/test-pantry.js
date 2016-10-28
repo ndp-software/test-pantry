@@ -1,49 +1,51 @@
-import seedrandom from 'seedrandom'
+import newRecipeContext from './recipe-context.js'
+import { looksLikeIterator, isEmptyObject } from './util'
 
 export default function Pantry() {
 
   const pantry = function(...args) {
-    let names     = args
-    const howMany = typeof names[0] == 'number' ? names.shift() : 0
-    names         = names.filter(n => n !== undefined)
+    let components = args
+    const howMany  = typeof components[0] == 'number' ? components.shift() : 0
+    components     = components.filter(n => n !== undefined)
 
-    names.forEach(name => {
-      if (typeof name == 'string' && !recipeFn(name)) {
-        throw `Unknown factory/trait '${name}'`
+    components.forEach(component => {
+      if (typeof component == 'string' && !recipeFn(component)) {
+        throw `Unknown factory/trait '${component}'`
       }
     })
-    names.forEach(name => {
-      if (typeof recipeFn(name) !== 'function'
-          && typeof name !== 'object'
-          && typeof name !== 'function') {
-        throw `Factory/trait '${name}' not a function`
+    components.forEach(component => {
+      if (typeof recipeFn(component) !== 'function'
+          && typeof component !== 'object'
+          && typeof component !== 'function') {
+        throw `Factory/trait '${component}' not a function`
       }
     })
+
+    const ctx = recipeCtx(components[0])
+    if (!ctx) {
+      throw `Unknown context '${components[0]}': unsupported usage`
+    }
 
     // May need to flip the first and second parameter
-    if (names.length >= 2
-        && typeof names[0] == 'string'
-        && typeof names[1] == 'object') {
-      [names[0], names[1]] = [names[1], names[0]]
+    if (components.length >= 2
+        && typeof components[0] == 'string'
+        && typeof components[1] == 'object') {
+      [components[0], components[1]] = [components[1], components[0]]
     }
 
     if (howMany != 0) {
-      return [...Array(howMany)].map(() => cook(names))
+      return [...Array(howMany)].map(() => cook.call(ctx, components))
     }
-    return cook(names)
+    return cook.call(ctx, components)
   }
 
-  function cook(names) {
-    return names.reduce((acc, name) => {
-      if (typeof name == 'object')
-        return Object.assign({}, acc, name)
-      return recipeFn(name)(acc)
+  function cook(components) {
+    return components.reduce((acc, component) => {
+      if (typeof component == 'object') {
+        return Object.assign({}, acc, component)
+      }
+      return recipeFn(component).call(this, acc)
     }, {})
-  }
-
-  function isEmptyObject(o) {
-    return typeof o == 'object'
-           && Object.keys(o).length == 0
   }
 
   // Given an obj, returns an object with all of the
@@ -86,61 +88,51 @@ export default function Pantry() {
     }
   }
 
+  function coerceToFn(objOrFn) {
+    switch (typeof objOrFn) {
+      case 'object':
+        return buildObjectFn(objOrFn)
+      case 'function':
+        return buildMergeFn(objOrFn)
+      case 'number':
+        return () => objOrFn
+      case 'string':
+      {
+        if (recipeFn(objOrFn)) {
+          return recipeFn(objOrFn)
+        }
+        throw `Bad factory component. '${objOrFn}' is not a known factory name. If you want to return a string, use "()=>'${objOrFn}'"`
+      }
+      default:
+        throw `Unknown factory component of type ${typeof objOrFn}: ${objOrFn}`
+    }
+  }
+
   // All storage of functions is here
   function recipeFn(name, fn) {
     if (fn) {
       pantry[`__${name}`] = fn
     }
-    return pantry[`__${name}`] || (typeof name == 'function' && name)
+    return pantry[`__${name}`] || typeof name == 'function' && name
+  }
+
+
+  function recipeCtx(name, seed = undefined) {
+    if (seed) {
+      pantry[`__${name}__context`] = newRecipeContext(name, seed)
+    }
+    return pantry[`__${name}__context`]
   }
 
   const recipeFor = (name, ...objOrFns) => {
-    let count  = 0
-    let random = seedrandom(name)
 
-    // Returns a random integer between min (included) and max (excluded)
-    // Using Math.round() will give you a non-uniform distribution!
-    function randomInt(a, b) {
-      let [min,max] = [a, b]
-      if (max == undefined) {
-        [min,max] = [0, min]
-      }
-      min = Math.ceil(min);
-      max = Math.floor(max);
-      return Math.floor(random() * (max - min)) + min;
-    }
+    recipeCtx(name, name)
 
-    function flipCoin() {
-      return random() > 0.5
-    }
+    const fns = objOrFns.map(coerceToFn)
 
-    function sample(...args) {
-      if (args[0] && args.length == 1 && Array.isArray(args[0])) args = args[0]
-      return args[randomInt(0, args.length)]
-    }
-
-    const fns = objOrFns
-      .map(objOrFn => {
-             const type = typeof objOrFn;
-             if (type === 'object') {
-               return buildObjectFn(objOrFn)
-             } else if (type === 'function') {
-               return buildMergeFn(objOrFn)
-             }
-             return recipeFn(objOrFn) // String case + catch all
-           })
-
-    recipeFn(name, (initialValues = {}) => {
-      count++
-      const context = {
-                 count,
-                 random,
-                 randomInt,
-                 flipCoin,
-                 sample,
-        rollDie: randomInt
-      }
-      return fns.reduce((vals, fn) => fn.call(context, vals), initialValues)
+    recipeFn(name, function(initialValues = {}) {
+      recipeCtx(name).count++;
+      return fns.reduce((vals, fn) => fn.call(this, vals), initialValues)
     })
 
     // And return a fn that calls `pantry()` with the arguments
@@ -156,15 +148,8 @@ export default function Pantry() {
       return pantry(name, ...args)
     }
 
-    function looksLikeIterator(args) {
-      return args.length == 3
-             && typeof args[1] == 'number'
-             && typeof args[2] == 'object'
-    }
-
     returnFn.reset = (seed = name) => {
-      count  = 0
-      random = seedrandom(seed)
+      recipeCtx(name, seed)
     }
 
     pantry[name] = returnFn
