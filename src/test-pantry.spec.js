@@ -297,6 +297,47 @@ describe('pantry', function() {
       expect(r).to.eql({id: 1, name: 'name #1', timestamp: 'june 4th'})
     })
 
+    it('can have fn overrides to mutate the factory object', function() {
+      pantry.recipeFor('cat', function() {
+        return {id: `id-${this.count}`, value: 'x'}
+      })
+
+      const result = pantry.cat(function(o) {
+        o.id = `cat-id-${this.count}`;
+        return o
+      })
+
+      expect(result).to.eql({ 'id': 'cat-id-1', value: 'x' })
+
+    })
+
+    it('can have fn overrides returning objects', function() {
+      pantry.recipeFor('cat', function() {
+        return {id: `cat-${this.count}`, value: 'x'}
+      })
+
+      const result = pantry.cat(function() {
+        return { id: `override-${this.count}` }
+      })
+
+      expect(result).to.eql({ 'id': 'override-1', value: 'x' })
+    })
+
+    it('can have attr fn overrides, which gets merged', function() {
+      pantry.recipeFor('cat', function() {
+        return {id: `cat-${this.count}`, value: 'x'}
+      })
+
+      const result = pantry.cat({
+        id: function() {
+          return `my-${this.count}`
+        },
+        value: 'x'
+    })
+
+      expect(result).to.eql({ 'id': 'cat-1', value: 'x' })
+    })
+
     describe('when recipe does not accept arguments', function() {
 
       it('merges params given', function() {

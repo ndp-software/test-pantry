@@ -26,7 +26,7 @@ export default function Pantry() {
       throw `Unknown context '${components[0]}': unsupported usage`
     }
 
-    // May need to flip the first and second parameter
+    // May need to flip the first and second parameter?
     if (components.length >= 2
         && typeof components[0] == 'string'
         && typeof components[1] == 'object') {
@@ -113,7 +113,7 @@ export default function Pantry() {
     if (fn) {
       pantry[`__${name}`] = fn
     }
-    return pantry[`__${name}`] || typeof name == 'function' && name
+    return pantry[`__${name}`] || typeof name == 'function' && buildMergeFn(name)
   }
 
 
