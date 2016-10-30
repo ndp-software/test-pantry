@@ -11,7 +11,7 @@
     "build": "WEBPACK_ENV=build webpack",
     "test": "mocha --compilers js:babel-core/register --colors 'src/**/*.spec.js'",
     "test:watch": "mocha --compilers js:babel-core/register --colors -w 'src/**/*.spec.js'",
-    "test:readme": "(echo 'var TestPantry = require(\"./lib/test-pantry.js\");'; erudite --stdout --stage 3 README.md) | node",
+    "test:readme": "node ./readme-test-filter.js && erudite --stage 3 README-filtered.md -o README.js && node README.js",
     "testx": "mocha --require test/register-babel.js --compilers js:babel-register 'test/**/*spec.js'",
     "dev": "WEBPACK_ENV=dev webpack --progress --colors --watch"
   },

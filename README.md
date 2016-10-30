@@ -3,16 +3,16 @@ Easy Test Factories: Your <del>Javascript</del> ES Test Sous Chef
 
 ## Installation & Basic Usage
 
-`# $ npm install -D test-pantry`
+`npm install -D test-pantry`
 
 ### Basic Factory Definition
 
 Create and export factories in a file near your tests:
  
 ```javascript
-// my-pantries.js
+// my-pantry.js
 
-import TestPantry from `test-pantry`
+import TestPantry from 'test-pantry'
  
 const pantry = new TestPantry()
 ```
@@ -33,7 +33,8 @@ pantry.recipeFor('keyed', { key: () => Math.random() })
 ### Basic Factory Usage
 
 ```javascript
-// my-test.js -- needs to `import pantry from 'my-pantry'`
+// my-test.js
+import pantry from 'my-pantry'
 
 // use the factory
 pantry('user')  // => { name: 'Andy P', email: 'andy@ndpsoftware.com' }
