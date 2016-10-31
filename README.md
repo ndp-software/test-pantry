@@ -1,5 +1,9 @@
 # Test Pantry  [![Build Status](https://travis-ci.org/ndp-software/test-pantry.svg?branch=master)](https://travis-ci.org/ndp-software/test-pantry)
-Easy Test Factories: Your <del>Javascript</del> ES Test Sous Chef 
+Easy Test Factories: Your ES Test Sous Chef
+
+  * simple, natural Javascript syntax and semantics
+  * fluid usage, combining factories, traits and functions when defining factories or on usage
+  * predictable ids and other random data
 
 ## Installation & Basic Usage
 
@@ -41,13 +45,17 @@ pantry('user')  // => { name: 'Andy P', email: 'andy@ndpsoftware.com' }
 
 // alternate call syntax:
 pantry.user()   // => { name: 'Andy P', email: 'andy@ndpsoftware.com' }
+```
 
-// or combine them, to create "traits". Each factory's results are merged:
+Factories can be considered **traits** and combined as needed:
+
+```
+// Each factory's results are merged!
 pantry('user', 'player') // => { name: 'Andy P',
                          //      email: 'andy@ndpsoftware.com',
                          //      score: 0.6207161337323834 }
 
-// or Mix-and-match as many as you'd like:
+// Mix-and-match as many as you'd like:
 pantry('user', 'player', { gender: 'male' }, 'keyed')
    // => { name: 'Andy P',
    //      email: 'andy@ndpsoftware.com',
@@ -55,7 +63,8 @@ pantry('user', 'player', { gender: 'male' }, 'keyed')
    //      gender: 'male',
    //      key: 0.652420063866042 }
 ```
-Arrays of objects are created by passing an integer as the first parameter:
+
+Finally, multiple objects are created by passing an integer as the first parameter:
 
 ```javascript
 pantry(3, 'user') // or `pantry.user(10)`
@@ -90,16 +99,16 @@ pantry.person() // => { first: 'Jennie', last: 'Lou', fullName: 'Jennie Lou' }
 ### Utilities on Factory Context
 
 Factories receive a few convenience utilities within the `this` context when they execute.
-The most basic of these is a variable called `count`, which is a serial number 
+The most basic of these are `count` and `name`, which is a serial number 
 for the object.
 
 ```javascript
-pantry.recipeFor('has-id', function () {
-  return { id : `id-${this.count}` }
+pantry.recipeFor('id', function () {
+  return { id : `${this.name}-${this.count}` }
 })
 
-pantry('has-id') // => { id : 'id-1' }
-pantry('has-id') // => { id : 'id-2' }
+pantry('id') // => { id : 'id-1' }
+pantry('id') // => { id : 'id-2' }
 ```
 
 The `this` context also provides:
@@ -110,14 +119,7 @@ The `this` context also provides:
   * **`this.sample('rock', 'paper', 'scissors')`** Return one of the given parameters
   * **`this.flipCoin()`** A boolean, true or false
   * **`this.count`** an index of which execution of the factory this is
-  * **`this.name`** the name of the main factory running. This is useful for composing shared properties, such as 
-```javascript
-pantry.recipeFor('hasId', function() {  
-  return {
-    id: `${this.name}-${this.count}`
-  }
-})
-```
+  * **`this.name`** the name of the main factory generating objects. If a factory is an aggregate of several factories, it will be the first definition that defines the name.
   
 For more variety, use a package like [Faker](https://www.npmjs.com/package/faker)
 
