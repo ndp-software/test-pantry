@@ -236,7 +236,7 @@ describe('pantry', function() {
 
   })
 
-  describe('now we\'re cooking: ', function() {
+  describe('cooking: ', function() {
 
     it('handles several different object-based factories', function() {
       pantry.recipeFor('id', {
@@ -297,7 +297,7 @@ describe('pantry', function() {
       expect(r).to.eql({id: 1, name: 'name #1', timestamp: 'june 4th'})
     })
 
-    it('can have fn overrides to mutate the factory object', function() {
+    it('can mutate the factory object with a provided function', function() {
       pantry.recipeFor('cat', function() {
         return {id: `id-${this.count}`, value: 'x'}
       })
@@ -307,38 +307,48 @@ describe('pantry', function() {
         return o
       })
 
-      expect(result).to.eql({ 'id': 'cat-id-1', value: 'x' })
+      expect(result).to.eql({'id': 'cat-id-1', value: 'x'})
+    })
+
+    it('will override a property with a passed object\'s properties', function() {
+      pantry.recipeFor('cat', function() {
+        return {id: `cat-${this.count}`, value: 'x'}
+      })
+
+      const result = pantry.cat({id: 'override!'})
+
+      expect(result).to.eql({'id': 'override!', value: 'x'})
 
     })
 
-    it('can have fn overrides returning objects', function() {
+    it('will merge a fn returning overrides', function() {
       pantry.recipeFor('cat', function() {
         return {id: `cat-${this.count}`, value: 'x'}
       })
 
       const result = pantry.cat(function() {
-        return { id: `override-${this.count}` }
+        return {id: `override-${this.count}`}
       })
 
-      expect(result).to.eql({ 'id': 'override-1', value: 'x' })
+      expect(result).to.eql({'id': 'override-1', value: 'x'})
     })
 
-    it('can have attr fn overrides, which gets merged', function() {
+    it('will merge an object with attr fn overrides', function() {
       pantry.recipeFor('cat', function() {
         return {id: `cat-${this.count}`, value: 'x'}
       })
 
       const result = pantry.cat({
-        id: function() {
+        id:    function() {
           return `my-${this.count}`
         },
         value: 'x'
+      })
+
+      expect(result).to.eql({'id': 'my-1', value: 'x'})
     })
 
-      expect(result).to.eql({ 'id': 'cat-1', value: 'x' })
-    })
-
-    describe('when recipe does not accept arguments', function() {
+    describe('when recipe does not accept arguments, ', function() {
 
       it('merges params given', function() {
         pantry.recipeFor('x', function() {
@@ -349,7 +359,7 @@ describe('pantry', function() {
       })
     })
 
-    describe('when recipe accepts arguments', function() {
+    describe('when recipe accepts arguments, ', function() {
 
       it('passes the first parameter in to first function', function() {
         pantry.recipeFor('x', function(inputs) {
@@ -390,7 +400,7 @@ describe('pantry', function() {
       })
     })
 
-    describe('multiple objs', function() {
+    describe('building arrays of objs', function() {
 
       it('will create multiple objects when a number is given', function() {
         pantry.recipeFor('myObj', {key: 'value'})

@@ -27,25 +27,28 @@ export default function Pantry() {
     }
 
     // May need to flip the first and second parameter?
+    let initialValues = {}
     if (components.length >= 2
         && typeof components[0] == 'string'
+        && recipeFn(components[0]).handlesInput
         && typeof components[1] == 'object') {
-      [components[0], components[1]] = [components[1], components[0]]
+      initialValues = components[1]
+      components.splice(1, 1)
     }
 
     if (howMany != 0) {
-      return [...Array(howMany)].map(() => cook.call(ctx, components))
+      return [...Array(howMany)].map(() => cook.call(ctx, components, initialValues))
     }
-    return cook.call(ctx, components)
+    return cook.call(ctx, components, initialValues)
   }
 
-  function cook(components) {
+  function cook(components, initialValues) {
     return components.reduce((acc, component) => {
       if (typeof component == 'object') {
-        return Object.assign({}, acc, component)
+        return Object.assign({}, acc, callPropertyFns.call(this, component))
       }
       return recipeFn(component).call(this, acc)
-    }, {})
+    }, initialValues)
   }
 
   // Given an obj, returns an object with all of the
@@ -109,8 +112,9 @@ export default function Pantry() {
   }
 
   // All storage of functions is here
-  function recipeFn(name, fn) {
+  function recipeFn(name, fn, handlesInput) {
     if (fn) {
+      fn.handlesInput = handlesInput
       pantry[`__${name}`] = fn
     }
     return pantry[`__${name}`] || typeof name == 'function' && buildMergeFn(name)
@@ -128,12 +132,17 @@ export default function Pantry() {
 
     recipeCtx(name, name)
 
+    const handlesInput = objOrFns.length > 0
+                         && typeof objOrFns[0] == 'function'
+                         && objOrFns[0].length > 0
+
+
     const fns = objOrFns.map(coerceToFn)
 
     recipeFn(name, function(initialValues = {}) {
       recipeCtx(name).count++;
       return fns.reduce((vals, fn) => fn.call(this, vals), initialValues)
-    })
+    }, handlesInput)
 
     // And return a fn that calls `pantry()` with the arguments
     // Need to switch the number (if given) to be first.
