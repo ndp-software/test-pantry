@@ -1,6 +1,8 @@
 import { expect } from 'chai'
 import Pantry from './test-pantry'
 
+const spec = it
+
 
 describe('pantry', function() {
 
@@ -12,42 +14,42 @@ describe('pantry', function() {
 
   describe('definition: ', function() {
 
-    it('a number', function() {
+    spec('a number', function() {
       pantry.recipeFor('id', 42)
       expect(pantry.id()).to.eql(42)
     })
 
-    it('an object literal', function() {
+    spec('an object literal', function() {
       pantry.recipeFor('myObj', {key: 'value'})
       const result = pantry.myObj()
       expect(result).to.eql({key: 'value'})
     })
 
-    it('a function returning an object', function() {
+    spec('a function returning an object', function() {
       pantry.recipeFor('myObj', () => ({key: 'value'}))
       const result = pantry.myObj()
       expect(result).to.eql({key: 'value'})
     })
 
-    it('a function returning a string', function() {
+    spec('a function returning a string', function() {
       pantry.recipeFor('id', function() {
         return `id-${this.count}`
       })
       expect(pantry.id()).to.eql('id-1')
     })
 
-    it('a function returning a number', function() {
+    spec('a function returning a number', function() {
       pantry.recipeFor('id', function() {
         return this.count
       })
       expect(pantry.id()).to.eql(1)
     })
 
-    it('an arbitrary string isn\'t allowed', function() {
+    spec('an arbitrary string isn\'t allowed', function() {
       expect(() => pantry.recipeFor('id', 'id-1')).to.throw(/id\-1.*is not a known factory name/)
     })
 
-    it('another factory name', function() {
+    spec('another factory name', function() {
       pantry.recipeFor('a', {a: 'a'})
       pantry.recipeFor('b', {b: 'b'})
       pantry.recipeFor('c', {c: 'c'})
@@ -57,7 +59,7 @@ describe('pantry', function() {
       expect(pantry('abc')).to.eql({a: 'a', b: 'b', c: 'c'})
     })
 
-    it('another factory', function() {
+    spec('another factory', function() {
       pantry.recipeFor('a', function() {
         return {a: 'a'}
       })
@@ -73,7 +75,7 @@ describe('pantry', function() {
       expect(pantry('abc')).to.eql({a: 'a', b: 'b', c: 'c'})
     })
 
-    it('an afterCreate function using first values', function() {
+    spec('an afterCreate function using first values', function() {
       pantry.recipeFor('person',
                        {first: 'foo', last: 'last'},
                        function(o) {
@@ -87,7 +89,7 @@ describe('pantry', function() {
       expect(result.fullName).to.eql('foo last')
     })
 
-    it('an afterCreateFn can access context', function() {
+    spec('an afterCreateFn can access context', function() {
       pantry.recipeFor('myObj', {key: 'value'}, function(x) {
         return Object.assign({}, x, {key1: `${x.key}${this.count}`})
       })
@@ -97,7 +99,7 @@ describe('pantry', function() {
       expect(result).to.eql({key: 'value', key1: 'value1'})
     })
 
-    it('can use `count`', function() {
+    spec('can use `count`', function() {
       pantry.recipeFor('myObj', function() {
         return {key: `value-${this.count}`}
       })
@@ -105,14 +107,14 @@ describe('pantry', function() {
       expect(pantry.myObj()).to.eql({key: 'value-2'})
     })
 
-    it('can use the factory\'s `name`', function() {
+    spec('can use the factory\'s `name`', function() {
       pantry.recipeFor('dog', function() {
         return {key: this.name}
       })
       expect(pantry.dog()).to.eql({key: 'dog'})
     })
 
-    it('can use the factory\'s `name` in different factories', function() {
+    spec('can use the factory\'s `name` in different factories', function() {
       pantry.recipeFor('hasId', function() {
         return {id: `${this.name}-${this.count}`}
       })
@@ -123,7 +125,7 @@ describe('pantry', function() {
       expect(pantry.cat()).to.eql({id: 'cat-1', meow: 'yes'})
     })
 
-    it('can restart counts', function() {
+    spec('can restart counts', function() {
       pantry.recipeFor('count', function() {
         return this.count
       })
@@ -140,7 +142,7 @@ describe('pantry', function() {
       expect(pantry.count()).to.eql(3)
     })
 
-    it('recipeFor() returns the factory method', function() {
+    spec('recipeFor() returns the factory method', function() {
       const f = pantry.recipeFor('myObj', {key: 'value'})
 
       const result = f()
@@ -148,18 +150,18 @@ describe('pantry', function() {
       expect(result).to.eql({key: 'value'})
     })
 
-    it('recipeFor() returns the factory method that accepts a count', function() {
+    spec('recipeFor() returns the factory method that accepts a count', function() {
       const f = pantry.recipeFor('myObj', {key: 'value'})
 
       expect(f(1)).to.eql([{key: 'value'}])
     })
 
-    it('can be defined with multiple objects', function() {
+    spec('can be defined with multiple objects', function() {
       pantry.recipeFor('abc', {a: 'a'}, {b: 'b'}, {c: 'c'})
       expect(pantry('abc')).to.eql({a: 'a', b: 'b', c: 'c'})
     })
 
-    it('can be defined with multiple functions', function() {
+    spec('can be defined with multiple functions', function() {
       pantry.recipeFor('abc',
                        function() {
                          return {a: 'a'}
@@ -174,13 +176,13 @@ describe('pantry', function() {
       expect(pantry('abc')).to.eql({a: 'a', b: 'b', c: 'c'})
     })
 
-    it('a property defined as a fn is evaluated', function() {
+    spec('a property defined as a fn is evaluated', function() {
       const f      = pantry.recipeFor('myObj', {key: () => 'value'})
       const result = f()
       expect(result).to.eql({key: 'value'})
     })
 
-    it('a property function is given a context', function() {
+    spec('a property function is given a context', function() {
       const f       = pantry.recipeFor('myObj', {
         key: function() {
           return `value-${this.count}`
@@ -191,7 +193,7 @@ describe('pantry', function() {
       expect(result1).not.to.eql(result2)
     })
 
-    it('a property function can call another factory method', function() {
+    spec('a property function can call another factory method', function() {
       pantry.recipeFor('house', {color: 'yellow'})
       expect(pantry.house()).to.eql({color: 'yellow'})
 
@@ -203,7 +205,7 @@ describe('pantry', function() {
       expect(rm.house).to.eql({color: 'yellow'})
     })
 
-    it('a property function can be another factory method', function() {
+    spec('a property function can be another factory method', function() {
       pantry.recipeFor('id', function() {
         return `id-${this.count}`
       })
@@ -216,7 +218,7 @@ describe('pantry', function() {
       expect(pantry.entity()).to.eql({id: 'id-2', name: 'name'})
     })
 
-    it('can chain together functions for recipes', function() {
+    spec('can chain together functions for recipes', function() {
       pantry.recipeFor('x', function() {
         return {a: 'A'}
       }, function() {
@@ -225,7 +227,7 @@ describe('pantry', function() {
       expect(pantry.x()).to.eql({a: 'A', b: 'B'})
     })
 
-    it('can chain together functions that feed into each other', function() {
+    spec('can chain together functions that feed into each other', function() {
       pantry.recipeFor('x', function() {
         return {a: 'A'}
       }, function(c) {
@@ -238,7 +240,7 @@ describe('pantry', function() {
 
   describe('cooking: ', function() {
 
-    it('handles several different object-based factories', function() {
+    spec('handles several different object-based factories', function() {
       pantry.recipeFor('id', {
         id: function() {
           return this.count
@@ -260,7 +262,7 @@ describe('pantry', function() {
       expect(r).to.eql({id: 1, name: 'name #1', timestamp: 'june 5th'})
     })
 
-    it('handles several different fn-based factories', function() {
+    spec('handles several different fn-based factories', function() {
       pantry.recipeFor('id', function() {
         return {
           id: this.count
@@ -282,7 +284,7 @@ describe('pantry', function() {
       expect(r).to.eql({id: 1, name: 'name #1', timestamp: 'june 5th'})
     })
 
-    it('can have factories and overrides', function() {
+    spec('can have factories and overrides', function() {
       pantry.recipeFor('id', function() {
         return {
           id: this.count
@@ -297,7 +299,7 @@ describe('pantry', function() {
       expect(r).to.eql({id: 1, name: 'name #1', timestamp: 'june 4th'})
     })
 
-    it('can mutate the factory object with a provided function', function() {
+    spec('can mutate the factory object with a provided function', function() {
       pantry.recipeFor('cat', function() {
         return {id: `id-${this.count}`, value: 'x'}
       })
@@ -310,7 +312,7 @@ describe('pantry', function() {
       expect(result).to.eql({'id': 'cat-id-1', value: 'x'})
     })
 
-    it('will override a property with a passed object\'s properties', function() {
+    spec('will override a property with a passed object\'s properties', function() {
       pantry.recipeFor('cat', function() {
         return {id: `cat-${this.count}`, value: 'x'}
       })
@@ -321,7 +323,7 @@ describe('pantry', function() {
 
     })
 
-    it('will merge a fn returning overrides', function() {
+    spec('will merge a fn returning overrides', function() {
       pantry.recipeFor('cat', function() {
         return {id: `cat-${this.count}`, value: 'x'}
       })
@@ -333,7 +335,7 @@ describe('pantry', function() {
       expect(result).to.eql({'id': 'override-1', value: 'x'})
     })
 
-    it('will merge an object with attr fn overrides', function() {
+    spec('will merge an object with attr fn overrides', function() {
       pantry.recipeFor('cat', function() {
         return {id: `cat-${this.count}`, value: 'x'}
       })
@@ -350,7 +352,7 @@ describe('pantry', function() {
 
     describe('when recipe does not accept arguments, ', function() {
 
-      it('merges params given', function() {
+      spec('merges params given', function() {
         pantry.recipeFor('x', function() {
           return {x: 5}
         })
@@ -361,7 +363,7 @@ describe('pantry', function() {
 
     describe('when recipe accepts arguments, ', function() {
 
-      it('passes the first parameter in to first function', function() {
+      spec('passes the first parameter in to first function', function() {
         pantry.recipeFor('x', function(inputs) {
           return {x: 3 * inputs.y}
         })
@@ -370,7 +372,7 @@ describe('pantry', function() {
       })
     })
 
-    it('an "after" function can access factory object', function() {
+    spec('an "after" function can access factory object', function() {
       pantry.recipeFor('cat', function() {
         return {id: `id-${this.count}`}
       })
@@ -385,7 +387,7 @@ describe('pantry', function() {
       })
     })
 
-    it('an "after" function can access `this` values', function() {
+    spec('an "after" function can access `this` values', function() {
       pantry.recipeFor('cat', function() {
         return {id: `id-${this.count}`}
       })
@@ -400,27 +402,27 @@ describe('pantry', function() {
       })
     })
 
-    describe('building arrays of objs', function() {
+    describe('arrays of objs', function() {
 
-      it('will create multiple objects when a number is given', function() {
+      spec('will create multiple objects when a number is given', function() {
         pantry.recipeFor('myObj', {key: 'value'})
         const result = pantry(2, 'myObj')
         expect(result).to.eql([{key: 'value'}, {key: 'value'}])
       })
 
-      it('will create multiple objects specific recipe is given a number', function() {
+      spec('will create multiple objects specific recipe is given a number', function() {
         pantry.recipeFor('myObj', {key: 'value'})
         const result = pantry.myObj(2)
         expect(result).to.eql([{key: 'value'}, {key: 'value'}])
       })
 
-      it('can be used in a filled array loop', function() {
+      spec('can be used in a filled array loop', function() {
         pantry.recipeFor('myObj', {key: 'value'})
         const result = Array(2).fill().map(pantry.myObj)
         expect(result).to.eql([{key: 'value'}, {key: 'value'}])
       })
 
-      it('can be used in a `map` loop', function() {
+      spec('can be used in a `map` loop', function() {
         pantry.recipeFor('myObj', {key: 'value'})
         const result = [1, 3, 5].map(x => ({id: `id-${x}`})).map(pantry.myObj)
         expect(result).to.eql([
@@ -430,7 +432,7 @@ describe('pantry', function() {
         ])
       })
 
-      it('can be with spread operator', function() {
+      spec('can be with spread operator', function() {
         pantry.recipeFor('myObj', {key: 'value'})
         const result = [...Array(2)].map(pantry.myObj)
         expect(result).to.eql([{key: 'value'}, {key: 'value'}])
@@ -443,7 +445,7 @@ describe('pantry', function() {
 
   describe('random: ', function() {
 
-    it('provides predictable, but random numbers', function() {
+    spec('provides predictable, but random numbers', function() {
       pantry.recipeFor('test', function() {
         return this.random()
       })
@@ -454,7 +456,7 @@ describe('pantry', function() {
       expect(pantry.test()).to.eql(0.30479896375101545)
     })
 
-    it('provides some random coin flips', function() {
+    spec('provides some random coin flips', function() {
       pantry.recipeFor('test', function() {
         return {bool: this.flipCoin()}
       })
@@ -466,7 +468,7 @@ describe('pantry', function() {
 
     })
 
-    it('provides some dieRoll', function() {
+    spec('provides some dieRoll', function() {
       pantry.recipeFor('dice', function() {
         return {
           die1: this.rollDie(6),
@@ -481,7 +483,7 @@ describe('pantry', function() {
       }
     })
 
-    it('provides some randomInt', function() {
+    spec('provides some randomInt', function() {
       pantry.recipeFor('dice', function() {
         return {
           die1: this.randomInt(6),
@@ -501,7 +503,7 @@ describe('pantry', function() {
       }
     })
 
-    it('can sample one of several values', function() {
+    spec('can sample one of several values', function() {
       pantry.recipeFor('roshambo', function() {
         return this.sample('rock', 'paper', 'scissors')
       })
@@ -512,7 +514,7 @@ describe('pantry', function() {
       expect(pantry.roshambo()).to.eql('rock')
     })
 
-    it('can sample from an array  values', function() {
+    spec('can sample from an array  values', function() {
       pantry.recipeFor('roshambo', function() {
         return this.sample(['rock', 'paper', 'scissors'])
       })
@@ -523,7 +525,7 @@ describe('pantry', function() {
       expect(pantry.roshambo()).to.eql('rock')
     })
 
-    it('random sequences are repeatable', function() {
+    spec('random sequences are repeatable', function() {
       pantry.recipeFor('randomSequence', function() {
         return this.randomInt(10)
       })
@@ -546,7 +548,7 @@ describe('pantry', function() {
       expect(pantry.randomSequence()).to.eql(3)
     })
 
-    it('can be seeded from the start', function() {
+    spec('can be seeded from the start', function() {
       pantry.recipeFor('randomSequence', function() {
         return this.randomInt(1000)
       })
@@ -561,7 +563,7 @@ describe('pantry', function() {
 
     })
 
-    it('produces different values with different seeds', function() {
+    spec('produces different values with different seeds', function() {
       pantry.recipeFor('randomSequence', function() {
         return this.randomInt(1000)
       })
