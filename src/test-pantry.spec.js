@@ -666,6 +666,32 @@ describe('pantry', function() {
 
       expect(animal.location.name).to.eql(zoo.name)
     })
+
+    spec('recipe generates related object if necessary', function() {
+      pantry.recipeFor('unicorn', {
+        location: function() { return this.last('zoo') }
+      })
+      pantry.recipeFor('zoo', {
+        name: function() {
+          return 'Zoological Garden'
+        }
+      })
+
+      const // no zoo    = pantry.zoo(),
+            animal = pantry.unicorn()
+
+      expect(animal.location.name).to.eql('Zoological Garden')
+    })
+
+    spec('factory.last generates object is necessary', function() {
+      pantry.recipeFor('zoo', function() {
+        return {
+          name: `Zoological Garden ${this.count}`
+        }
+      })
+
+      expect(pantry.last('zoo')()).to.eql({ name: 'Zoological Garden 1'})
+    })
   })
 
 })

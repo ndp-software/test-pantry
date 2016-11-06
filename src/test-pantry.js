@@ -177,7 +177,7 @@ export default function Pantry() {
 
   // Private fn returns function that returns last generated name
   pantry.last      = function(name) {
-    return () => lastGenerated(name)
+    return () => lastGenerated(name) || pantry(name)
   }
 
   // Public API
