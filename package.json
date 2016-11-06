@@ -12,7 +12,6 @@
     "test": "mocha --compilers js:babel-core/register --colors 'src/**/*.spec.js'",
     "test:watch": "mocha --compilers js:babel-core/register --colors -w 'src/**/*.spec.js'",
     "test:readme": "node ./readme-test-filter.js && erudite --stage 3 README-filtered.md -o README.js && node README.js",
-    "testx": "mocha --require test/register-babel.js --compilers js:babel-register 'test/**/*spec.js'",
     "dev": "WEBPACK_ENV=dev webpack --progress --colors --watch"
   },
   "repository": {
@@ -33,7 +32,7 @@
   },
   "homepage": "https://github.com/ndp/test-pantry#readme",
   "dependencies": {
-    "seedrandom": "^2.4.2"
+    "seedrandom": "^2.3.6"
   },
   "devDependencies": {
     "babel": "^6.5",
