@@ -120,6 +120,7 @@ The `this` context also provides:
   * **`this.flipCoin()`** A boolean, true or false
   * **`this.count`** an index of which execution of the factory this is
   * **`this.name`** the name of the main factory generating objects. If a factory is an aggregate of several factories, it will be the first definition that defines the name.
+  * **`this.pantry`** reference to the pantry itself. Useful if the same function is shared between different pantries.
   
 For more variety, use a package like [Faker](https://www.npmjs.com/package/faker)
 

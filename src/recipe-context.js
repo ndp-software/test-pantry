@@ -1,6 +1,6 @@
 import seedrandom from 'seedrandom'
 
-export default function(name, seed) {
+export default function(name, seed, pantry) {
   const random = seedrandom(seed)
 
   // Returns a random integer between min (included) and max (excluded)
@@ -27,6 +27,7 @@ export default function(name, seed) {
   return {
     count:   0,
              name,
+             pantry,
              random,
              randomInt,
              flipCoin,

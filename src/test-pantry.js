@@ -123,7 +123,7 @@ export default function Pantry() {
 
   function recipeCtx(name, seed = undefined) {
     if (seed) {
-      pantry[`__${name}__context`] = newRecipeContext(name, seed)
+      pantry[`__${name}__context`] = newRecipeContext(name, seed, pantry)
     }
     return pantry[`__${name}__context`]
   }
