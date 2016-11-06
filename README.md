@@ -107,7 +107,7 @@ pantry('user', 'player', { gender: 'male' }, 'keyed')
 TBD
 
 ### Serial Numbers
-Factories defined with functions will receive a convenience utilities attached to `this` context. The function `this.name()` returns the name of the factory being used. And `this.count` is a serial number of the object. Therefore:
+Factories defined with functions will receive a convenience utilities attached to `this` context. The value `this.name` is the name of the factory being used, and `this.count` is a serial number of the object. Therefore:
 
 ```javascript
 pantry.recipeFor('id', function () {
@@ -160,15 +160,15 @@ For more variety of random functions, use a package like [Faker](https://www.npm
 
 When working with data models, you'll have one object refer to another object. There are several techniques to create these from factories:
   
-1. The most simple is to create related objects in the factory:
+1. The simplest is to create related objects in the factory:
   
     ```javascript
     factory.recipeFor('school', {})
     factory.recipeFor('teacher', { school: factory.school })
     ```
-    This works, until you need several objects to share a reference. The above factories will create a new school for each teacher. 
+    This works, until you need several objects to share a reference. The teacher factory above will create a new school for each teacher object. 
 
-2. This can be fixed using overrides during factory usage:
+2. This can be fixed by overriding a value during factory usage. Using the same factories:
     ```javascript
     const school = factory.school()
     factory('teacher', 5, { school }) // only one school
@@ -177,7 +177,7 @@ When working with data models, you'll have one object refer to another object. T
     ```
     This works, but _requires the user of the factory to do something special_. This is not ideal.
 
-3. To move this into the factory, Test Pantry provides a function `this.last`, which remembers the previous object created:
+3. To move this behavior into the factory, Test Pantry provides a function `this.last`, which remembers the previous object created:
     
     ```javascript
     factory.recipeFor('teacher', { school: factory.last('school') })
@@ -186,12 +186,14 @@ When working with data models, you'll have one object refer to another object. T
     ```
     The `last` function returns a function that returns the last object created. 
  
- 4. If there is no previous object, *`last` will create one*. This allows `factory.last` to function without having special calling constraints. This works fine:
+4. If there is no previous object, *`last` will create one*. This allows the consuming factory to function without having special prerequisites. This code works fine:
     
     ```javascript
     factory.recipeFor('teacher', { school: factory.last('school') })
     factory('teacher', 5) // all part of one `school`
     ```
+
+Note that `factory.last` is also available as `this.last()` within the factory function context.
 
 ## Advanced Usage
 
@@ -199,6 +201,15 @@ When working with data models, you'll have one object refer to another object. T
 
 There is no single, global factory. Generally you will just need one factory for your
 code, but it's easy to create more with `new TestPantry()`.
+
+### Factory functions
+
+If you'd rather not export a factory that generates different types of objects, you can export individual functions. The individual factory functions are available and work independently. In fact, `recipeFor` returns the factory function:
+```
+const unicornFactory = factory.recipeFor('unicorn', {})
+//...
+const myUnicorn = unicornFactory()
+```
 
 ### Count reset
 
@@ -281,7 +292,7 @@ Copyright (c) 2016 Andrew J. Peterson
 [Apache 2.0 License](https://github.com/ndp/test-pantry/raw/master/LICENSE)
 
 
-## Todo
+## Documentation Todo
 
 * document Extend a factory
 * pass in a param to generate N of some child object
