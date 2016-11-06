@@ -182,7 +182,7 @@ describe('pantry', function() {
       expect(result).to.eql({key: 'value'})
     })
 
-    spec('a property function is given a context', function() {
+    spec('a property function is given a context with a count reference', function() {
       const f       = pantry.recipeFor('myObj', {
         key: function() {
           return `value-${this.count}`
@@ -191,6 +191,16 @@ describe('pantry', function() {
       const result1 = f()
       const result2 = f()
       expect(result1).not.to.eql(result2)
+    })
+
+    spec('a property function is given a context with a pantry reference', function() {
+      pantry.recipeFor('myObj', {
+        pantry: function() {
+          return this.pantry
+        }
+      })
+      const result = pantry.myObj()
+      expect(result.pantry).to.eql(pantry)
     })
 
     spec('a property function can call another factory method', function() {
@@ -442,7 +452,6 @@ describe('pantry', function() {
 
   })
 
-
   describe('random: ', function() {
 
     spec('provides predictable, but random numbers', function() {
@@ -577,6 +586,61 @@ describe('pantry', function() {
       expect(pantry.randomSequence()).not.to.eql(731)
     })
 
+  })
+
+  describe('referencing other objects', function() {
+    spec('can reference other factories', function() {
+      pantry.recipeFor('unicorn', {horn: 'toot'})
+      pantry.recipeFor('zoo', {animals: [pantry.unicorn()]})
+
+      const zoo = pantry.zoo()
+
+      expect(zoo).to.eql({animals: [{horn: 'toot'}]})
+    })
+
+    spec('can reference last generated object', function() {
+      pantry.recipeFor('zoo', {
+        value: function() {
+          return Math.random()
+        }
+      })
+
+      const zoo = pantry.zoo()
+
+      expect(pantry.last('zoo')()).to.eql(zoo)
+    })
+
+    spec('recipe can reference last generated object', function() {
+      pantry.recipeFor('unicorn', {
+        location: pantry.last('zoo')
+      })
+      pantry.recipeFor('zoo', {
+        value: function() {
+          return `Zoological Garden #${Math.random()}`
+        }
+      })
+
+      const zoo    = pantry.zoo(),
+            animal = pantry.unicorn()
+
+      expect(animal.location.name).to.eql(zoo.name)
+    })
+
+    spec('recipe can find last generated object from context', function() {
+      pantry.recipeFor('unicorn', {
+        location: function() { return this.last('zoo') }
+      })
+      pantry.recipeFor('zoo', {
+        value: function() {
+          return `Zoological Garden #${Math.random()}`
+        }
+      })
+
+      const zoo    = pantry.zoo(),
+            animal = pantry.unicorn()
+
+      expect(animal.location.name).to.eql(zoo.name)
+    })
   })
 
 })

@@ -32,6 +32,7 @@ export default function(name, seed, pantry) {
              randomInt,
              flipCoin,
              sample,
-    rollDie: randomInt
+    rollDie: randomInt,
+    last:    (name) => pantry.last(name)()
   }
 }

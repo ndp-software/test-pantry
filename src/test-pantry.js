@@ -43,12 +43,12 @@ export default function Pantry() {
   }
 
   function cook(components, initialValues) {
-    return components.reduce((acc, component) => {
+    return lastGenerated(components[0], components.reduce((acc, component) => {
       if (typeof component == 'object') {
         return Object.assign({}, acc, callPropertyFns.call(this, component))
       }
       return recipeFn(component).call(this, acc)
-    }, initialValues)
+    }, initialValues))
   }
 
   // Given an obj, returns an object with all of the
@@ -114,18 +114,27 @@ export default function Pantry() {
   // All storage of functions is here
   function recipeFn(name, fn, handlesInput) {
     if (fn) {
-      fn.handlesInput = handlesInput
+      fn.handlesInput     = handlesInput
       pantry[`__${name}`] = fn
     }
     return pantry[`__${name}`] || typeof name == 'function' && buildMergeFn(name)
   }
 
-
+  // All storage of context is here
   function recipeCtx(name, seed = undefined) {
     if (seed) {
       pantry[`__${name}__context`] = newRecipeContext(name, seed, pantry)
     }
     return pantry[`__${name}__context`]
+  }
+
+  // All storage of last is here
+  function lastGenerated(name, value) {
+    const key = `__${name}__last`
+    if (value !== undefined) {
+      pantry[key] = value
+    }
+    return pantry[key]
   }
 
   const recipeFor = (name, ...objOrFns) => {
@@ -164,6 +173,11 @@ export default function Pantry() {
     pantry[name] = returnFn
 
     return returnFn
+  }
+
+  // Private fn returns function that returns last generated name
+  pantry.last      = function(name) {
+    return () => lastGenerated(name)
   }
 
   // Public API
