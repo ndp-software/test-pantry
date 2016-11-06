@@ -512,13 +512,36 @@ describe('pantry', function() {
       }
     })
 
+    spec('distributes randomInt', function() {
+      pantry.recipeFor('die', function() {
+        return {
+          die: this.randomInt(1, 6)
+        }
+      })
+      const histogram = {}
+      for (let i = 0; i < 6000; i++) {
+        const roll = pantry('die')
+        histogram[roll.die] = histogram[roll.die] || 0
+        histogram[roll.die]++
+      }
+      expect(histogram[1]).to.eql(1040)
+      expect(histogram[6]).to.eql(1027)
+    })
+
     spec('can sample one of several values', function() {
       pantry.recipeFor('roshambo', function() {
         return this.sample('rock', 'paper', 'scissors')
       })
-      expect(pantry.roshambo()).to.eql('paper')
+      expect(pantry.roshambo()).to.eql('scissors')
       expect(pantry.roshambo()).to.eql('rock')
       expect(pantry.roshambo()).to.eql('paper')
+      expect(pantry.roshambo()).to.eql('paper')
+      expect(pantry.roshambo()).to.eql('paper')
+      expect(pantry.roshambo()).to.eql('scissors')
+      expect(pantry.roshambo()).to.eql('scissors')
+      expect(pantry.roshambo()).to.eql('scissors')
+      expect(pantry.roshambo()).to.eql('rock')
+      expect(pantry.roshambo()).to.eql('rock')
       expect(pantry.roshambo()).to.eql('scissors')
       expect(pantry.roshambo()).to.eql('rock')
     })
@@ -527,11 +550,13 @@ describe('pantry', function() {
       pantry.recipeFor('roshambo', function() {
         return this.sample(['rock', 'paper', 'scissors'])
       })
-      expect(pantry.roshambo()).to.eql('paper')
-      expect(pantry.roshambo()).to.eql('rock')
-      expect(pantry.roshambo()).to.eql('paper')
       expect(pantry.roshambo()).to.eql('scissors')
       expect(pantry.roshambo()).to.eql('rock')
+      expect(pantry.roshambo()).to.eql('paper')
+      expect(pantry.roshambo()).to.eql('paper')
+      expect(pantry.roshambo()).to.eql('paper')
+      expect(pantry.roshambo()).to.eql('scissors')
+      expect(pantry.roshambo()).to.eql('scissors')
     })
 
     spec('random sequences are repeatable', function() {

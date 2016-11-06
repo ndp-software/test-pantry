@@ -9,6 +9,8 @@ export default function(name, seed, pantry) {
     let [min,max] = [a, b]
     if (max == undefined) {
       [min,max] = [0, min]
+    } else {
+      max++
     }
     min = Math.ceil(min);
     max = Math.floor(max);
