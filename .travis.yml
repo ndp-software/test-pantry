@@ -3,5 +3,9 @@ node_js:
   - "6"
   - "6.1"
   - "5.11"
+script:
+  - npm test
+  - eslint src
+  - npm run test:readme
 notifications:
   email: false
