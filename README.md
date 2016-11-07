@@ -106,8 +106,8 @@ pantry('user', 'player', { gender: 'male' }, 'keyed')
 
 TBD
 
-### Serial Numbers
-Factories defined with functions will receive a convenience utilities attached to `this` context. The value `this.name` is the name of the factory being used, and `this.count` is a serial number of the object. Therefore:
+### Sequences
+Factories defined with functions will receive a convenience utilities attached to `this` context. The value `this.name` is the name of the factory being used, and `this.count` is a serial number of the object. With these, it's easy to build a standard serial number sequence:
 
 ```javascript
 pantry.recipeFor('has-id', function () {
@@ -115,7 +115,7 @@ pantry.recipeFor('has-id', function () {
 })
 pantry('has-id') // --> { id : 'has-id-1' }
 ```
-Since `name` is dynamic, it will change in a different context:
+Since `name` is dynamic, it will change in a different factory context:
 
 ```javascript
 pantry.recipeFor('book', {}, 'has-id')
@@ -141,7 +141,7 @@ pantry.randomSequence() // --> 5
 ...
 ```
 
-#### `this.random`
+#### `this.random()`
 
 Returns a random float between 0 (inclusive) and 1 (exclusive). 
 
@@ -228,11 +228,11 @@ pantry.num.reset()
 pantry.num() // --> 1
 ```
 
-### // -->ndom Reset
+### Random Reset
 
 The pseudo random number generators included as designed to provide random--
 but repeatable-- sequences. This is done by explicitly seeding a pseudo random number
-generator (PRNG). This is done for you, and each factory has its own sequence.
+generator (PRNG). This is done for you, and each factory has its own sequence, but the factory has `reset` method that re-seeds.
 
 Here's an example:
 
@@ -253,7 +253,7 @@ pantry.randomSequence() // --> 6
 pantry.randomSequence() // --> 2
 ```
 
-For some tests, it may make sense to set the seed before you start:
+For some tests, it makes sense to set the seed before you start. This may make sense in a `before` block:
 
 ```javascript
 pantry.recipeFor('randomSequence', function() {
@@ -273,17 +273,17 @@ pantry.randomSequence() // --> 731
 
 ## Reference
 
-The following methods are available within a factory context:
+The following are available within a factory context:
 
+  * **`this.count`** an index of which execution of the factory this is
+  * **`this.flipCoin()`** A boolean, true or false
+  * **`this.last(name)`** a function that returns the last generated object of factory `name`. If there is is no object yet, it will build one.
   * **`this.name`** the name of the main factory generating objects. If a factory is an aggregate of several factories, it will be the first definition that defines the name.
   * **`this.pantry`** reference to the pantry itself. Useful if the same function is shared between different pantries.
-  * **`this.last(name)`** a function that returns the last generated
   * **`this.random()`** A random float between 0 (inclusive) and 1 (exclusive). This is an alternative to `Math.random`. Sometimes in a test it's useful to use random numbers, but doing so can make writing assertions harder. This method meets you half way: it provides a random series of numbers-- but always the same sequence (based on a controllable seed). See [Random Reset](#random-reset) below
   * **`this.randomInt(6)`** A random integer 0..5. Alias: `rollDie`.
   * **`this.randomInt(6, 10)`** A random integer 6..10
   * **`this.sample('rock', 'paper', 'scissors')`** Return one of the given parameters
-  * **`this.flipCoin()`** A boolean, true or false
-  * **`this.count`** an index of which execution of the factory this is
 
 
 ## Legal
@@ -296,6 +296,4 @@ Copyright (c) 2016 Andrew J. Peterson
 
 * document Extend a factory
 * pass in a param to generate N of some child object
-* support `sequence` method
-* alternate usage `person = factory.recipeFor('person', ...)`
 * parameterized factories
