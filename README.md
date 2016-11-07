@@ -42,10 +42,10 @@ pantry.recipeFor('player', function() {
 // my-test.js
 import pantry from 'my-pantry'
 
-pantry('user')  // => { name: 'Andreas Pepper', email: 'andreas@ndpsoftware.com' }
+pantry('user')  // --> { name: 'Andreas Pepper', email: 'andreas@ndpsoftware.com' }
 
 // alternate call syntax:
-pantry.user()   // => { name: 'Andreas Pepper', email: 'andreas@ndpsoftware.com' }
+pantry.user()   // --> { name: 'Andreas Pepper', email: 'andreas@ndpsoftware.com' }
 ```
 
 ## Features
@@ -76,7 +76,7 @@ pantry.recipeFor( 'person',
                   function() { return { first: 'Jennie', last: 'Lou' } },
                   function(o) { o.fullName = `${o.first} ${o.last}`; return o })
                   
-pantry.person() // => { first: 'Jennie', last: 'Lou', fullName: 'Jennie Lou' }                  
+pantry.person() // --> { first: 'Jennie', last: 'Lou', fullName: 'Jennie Lou' }                  
 ```                 
 
 In fact, Test Pantry allows any number of methods or object literals to be 
@@ -110,12 +110,16 @@ TBD
 Factories defined with functions will receive a convenience utilities attached to `this` context. The value `this.name` is the name of the factory being used, and `this.count` is a serial number of the object. Therefore:
 
 ```javascript
-pantry.recipeFor('id', function () {
+pantry.recipeFor('has-id', function () {
   return { id : `${this.name}-${this.count}` }
 })
+pantry('has-id') // --> { id : 'has-id-1' }
+```
+Since `name` is dynamic, it will change in a different context:
 
-pantry('id') // => { id : 'id-1' }
-pantry('id') // => { id : 'id-2' }
+```javascript
+pantry.recipeFor('book', {}, 'has-id')
+pantry('book') // --> { id : 'book-1' }
 ```
 
 ### Generating Random Data
@@ -130,12 +134,10 @@ pantry.recipeFor('randomSequence', function() {
   return this.randomInt(10)
 })
 
-const assert = function(x) { if (!x) throw "Assertion failure!" }
-
-assert( pantry.randomSequence() == 9)
-assert( pantry.randomSequence() == 6)
-assert( pantry.randomSequence() == 2)
-assert( pantry.randomSequence() == 5)
+pantry.randomSequence() // --> 9
+pantry.randomSequence() // --> 6
+pantry.randomSequence() // --> 2
+pantry.randomSequence() // --> 5
 ...
 ```
 
@@ -163,34 +165,34 @@ When working with data models, you'll have one object refer to another object. T
 1. The simplest is to create related objects in the factory:
   
     ```javascript
-    factory.recipeFor('school', {})
-    factory.recipeFor('teacher', { school: factory.school })
+    pantry.recipeFor('school', {})
+    pantry.recipeFor('teacher', { school: pantry.school })
     ```
     This works, until you need several objects to share a reference. The teacher factory above will create a new school for each teacher object. 
 
 2. This can be fixed by overriding a value during factory usage. Using the same factories:
     ```javascript
-    const school = factory.school()
-    factory('teacher', 5, { school }) // only one school
+    const school = pantry.school()
+    pantry(5, 'teacher', { school }) // only one school
     // or
-    factory('teacher', 5, { school: factory.school })
+    pantry(5, 'teacher', { school: pantry.school })
     ```
     This works, but _requires the user of the factory to do something special_. This is not ideal.
 
 3. To move this behavior into the factory, Test Pantry provides a function `this.last`, which remembers the previous object created:
     
     ```javascript
-    factory.recipeFor('teacher', { school: factory.last('school') })
-    const school = factory.school() // make a school
-    factory('teacher', 5) // all part of `school`
+    pantry.recipeFor('teacher', { school: pantry.last('school') })
+    pantry.school() // make a school
+    pantry(5, 'teacher') // all part of `school`
     ```
     The `last` function returns a function that returns the last object created. 
  
 4. If there is no previous object, *`last` will create one*. This allows the consuming factory to function without having special prerequisites. This code works fine:
     
     ```javascript
-    factory.recipeFor('teacher', { school: factory.last('school') })
-    factory('teacher', 5) // all part of one `school`
+    pantry.recipeFor('teacher', { school: pantry.last('school') })
+    pantry(5, 'teacher') // all part of one `school`
     ```
 
 Note that `factory.last` is also available as `this.last()` within the factory function context.
@@ -206,7 +208,7 @@ code, but it's easy to create more with `new TestPantry()`.
 
 If you'd rather not export a factory that generates different types of objects, you can export individual functions. The individual factory functions are available and work independently. In fact, `recipeFor` returns the factory function:
 ```
-const unicornFactory = factory.recipeFor('unicorn', {})
+const unicornFactory = pantry.recipeFor('unicorn', {})
 //...
 const myUnicorn = unicornFactory()
 ```
@@ -219,14 +221,14 @@ The `count` can be reset, which is useful so that a test always gets the
 ```javascript
 pantry.recipeFor('num', function() { return this.count  })
 
-pantry.num() // => 1
-pantry.num() // => 2
-pantry.num() // => 3
+pantry.num() // --> 1
+pantry.num() // --> 2
+pantry.num() // --> 3
 pantry.num.reset()
-pantry.num() // => 1
+pantry.num() // --> 1
 ```
 
-### Random Reset
+### // -->ndom Reset
 
 The pseudo random number generators included as designed to provide random--
 but repeatable-- sequences. This is done by explicitly seeding a pseudo random number
@@ -239,18 +241,16 @@ pantry.recipeFor('randomSequence', function() {
   return this.randomInt(10)
 })
 
-const assert = function(x) { if (!x) throw "Assertion failure!" }
-
-assert( pantry.randomSequence() == 9)
-assert( pantry.randomSequence() == 6)
-assert( pantry.randomSequence() == 2)
-assert( pantry.randomSequence() == 5)
+pantry.randomSequence() // --> 9
+pantry.randomSequence() // --> 6
+pantry.randomSequence() // --> 2
+pantry.randomSequence() // --> 5
 
 pantry.randomSequence.reset()   // let's start over
 
-assert( pantry.randomSequence() == 9)
-assert( pantry.randomSequence() == 6)
-assert( pantry.randomSequence() == 2)
+pantry.randomSequence() // --> 9
+pantry.randomSequence() // --> 6
+pantry.randomSequence() // --> 2
 ```
 
 For some tests, it may make sense to set the seed before you start:
@@ -262,13 +262,13 @@ pantry.recipeFor('randomSequence', function() {
 
 // 'test 1'
 pantry.randomSequence.reset('foo')
-assert( pantry.randomSequence() == 467)
-assert( pantry.randomSequence() == 731)
+pantry.randomSequence() // --> 467
+pantry.randomSequence() // --> 731
 
 // 'test 2'
 pantry.randomSequence.reset('foo')
-assert( pantry.randomSequence() == 467)
-assert( pantry.randomSequence() == 731)
+pantry.randomSequence() // --> 467
+pantry.randomSequence() // --> 731
 ```
 
 ## Reference
