@@ -10,7 +10,6 @@
     "mocha": true
   },
   "globals": {},
-  "parser": "babel-eslint",
   "plugins": [],
   "rules": {
     "no-extra-parens": 2,
